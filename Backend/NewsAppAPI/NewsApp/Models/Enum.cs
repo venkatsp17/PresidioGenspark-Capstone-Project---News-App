@@ -7,5 +7,13 @@
             Reader,
             Admin
         }
+
+        public enum ArticleStatus
+        {
+            Pending,
+            Edited,
+            Approved, 
+            Rejected
+        }
     }
 }

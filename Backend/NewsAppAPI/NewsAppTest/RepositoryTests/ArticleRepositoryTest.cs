@@ -2,14 +2,7 @@
 using NewsApp.Contexts;
 using NewsApp.Exceptions;
 using NewsApp.Models;
-using NewsApp.Repositories;
 using NewsApp.Repositories.Classes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static NewsApp.Models.Enum;
 
 namespace NewsAppTest.RepositoryTests
 {
@@ -43,7 +36,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID="",
+                OldHashID=""
             };
 
             var result = await _articleRepository.Add(article1);
@@ -68,7 +63,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID = "",
+                OldHashID = ""
             };
 
             await _articleRepository.Add(article1);
@@ -108,7 +105,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID = "",
+                OldHashID = ""
             };
 
             await _articleRepository.Add(article1);
@@ -141,7 +140,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID = "",
+                OldHashID = ""
             };
             article1.Title = "Breaking News: Tech Destruction";
 
@@ -164,7 +165,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID = "",
+                OldHashID = ""
             };
 
             await _articleRepository.Add(article1);
@@ -199,7 +202,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID = "",
+                OldHashID = ""
             };
 
             var article2 = new Article
@@ -213,7 +218,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/economy.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 8.2m,
-                ShareCount = 150
+                ShareCount = 150,
+                HashID = "",
+                OldHashID = ""
             };
 
             var article3 = new Article
@@ -227,7 +234,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/health.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.0m,
-                ShareCount = 200
+                ShareCount = 200,
+                HashID = "",
+                OldHashID = ""
             };
 
 
@@ -281,7 +290,9 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100
+                ShareCount = 100,
+                HashID = "",
+                OldHashID = ""
             };
             context.Articles.Add(article1);
             await context.SaveChangesAsync();

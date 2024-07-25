@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsApp.Contexts;
 
@@ -11,9 +12,10 @@ using NewsApp.Contexts;
 namespace NewsApp.Migrations
 {
     [DbContext(typeof(NewsAppDBContext))]
-    partial class NewsAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240725135133_addcolumnstatusarticle")]
+    partial class addcolumnstatusarticle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,14 +198,6 @@ namespace NewsApp.Migrations
                     b.Property<string>("OAuthToken")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Password")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("Password_Hashkey")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");

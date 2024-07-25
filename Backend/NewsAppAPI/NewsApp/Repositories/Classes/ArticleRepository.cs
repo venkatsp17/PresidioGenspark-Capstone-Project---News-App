@@ -35,15 +35,14 @@ namespace NewsApp.Repositories.Classes
             {
                 _dbSet.Remove(entity);
                 await _context.SaveChangesAsync();
-                return entity;
             }
-            throw new ItemNotFoundException();
+            return entity;
         }
 
         public async Task<Article> Get(string key, string value)
         {
             var constant = Expression.Constant(value);
-            if (key.ToLower().Contains("id"))
+            if (key.ToLower().Contains("id") && !(key.ToLower().Contains("hash")))
             {
                 constant = Expression.Constant(int.Parse(value));
             }
@@ -53,9 +52,9 @@ namespace NewsApp.Repositories.Classes
             var lambda = Expression.Lambda<Func<Article, bool>>(equal, parameter);
 
             var result = await _dbSet.FirstOrDefaultAsync(lambda);
-            if (result != null)
-                return result;
-            throw new ItemNotFoundException();
+
+            return result;
+
         }
 
         public async Task<IEnumerable<Article>> GetAll(string key, string value)
@@ -63,9 +62,9 @@ namespace NewsApp.Repositories.Classes
             if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(value))
             {
                 var result1 = await _dbSet.ToListAsync();
-                if (result1.Count != 0)
-                    return result1;
-                throw new NoAvailableItemException();
+
+                return result1;
+
             }
 
             var propertyInfo = typeof(Article).GetProperty(key);
@@ -97,9 +96,8 @@ namespace NewsApp.Repositories.Classes
 
             var result = await _dbSet.Where(lambda).ToListAsync();
 
-            if (result != null && result.Count > 0)
-                return result;
-            throw new NoAvailableItemException();
+            return result;
+
         }
 
         public async Task<Article> Update(Article item, string key)
@@ -109,9 +107,8 @@ namespace NewsApp.Repositories.Classes
             {
                 _dbSet.Update(item);
                 await _context.SaveChangesAsync();
-                return item;
             }
-            throw new ItemNotFoundException();
+            return item;
         }
     }
 }

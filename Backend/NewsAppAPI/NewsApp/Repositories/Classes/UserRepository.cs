@@ -33,9 +33,9 @@ namespace NewsApp.Repositories.Classes
             {
                 _dbSet.Remove(entity);
                 await _context.SaveChangesAsync();
-                return entity;
+
             }
-            throw new ItemNotFoundException();
+            return entity;
         }
 
         public async Task<User> Get(string key, string value)
@@ -51,9 +51,8 @@ namespace NewsApp.Repositories.Classes
             var lambda = Expression.Lambda<Func<User, bool>>(equal, parameter);
 
             var result = await _dbSet.FirstOrDefaultAsync(lambda);
-            if (result != null)
-                return result;
-            throw new ItemNotFoundException();
+
+            return result;
         }
 
         public async Task<IEnumerable<User>> GetAll(string key, string value)
@@ -61,9 +60,9 @@ namespace NewsApp.Repositories.Classes
             if (key == "" && value == "")
             {
                 var result1 = await _dbSet.ToListAsync();
-                if (result1.Count != 0)
-                    return result1;
-                throw new NoAvailableItemException();
+
+                return result1;
+
             }
             object constant = value;
             if (key.ToLower().Contains("role"))
@@ -76,9 +75,9 @@ namespace NewsApp.Repositories.Classes
             var lambda = Expression.Lambda<Func<User, bool>>(equal, parameter);
 
             var result = await _dbSet.Where(lambda).ToListAsync();
-            if (result.Count != 0)
-                return result;
-            throw new NoAvailableItemException();
+
+            return result;
+
         }
 
         public async Task<User> Update(User item, string key)
@@ -88,9 +87,8 @@ namespace NewsApp.Repositories.Classes
             {
                 _dbSet.Update(item);
                 await _context.SaveChangesAsync();
-                return item;
             }
-            throw new ItemNotFoundException();
+            return item;
         }
     }
 }

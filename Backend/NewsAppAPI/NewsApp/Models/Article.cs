@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using static NewsApp.Models.Enum;
 
 namespace NewsApp.Models
 {
@@ -23,6 +24,12 @@ namespace NewsApp.Models
         public DateTime CreatedAt { get; set; }
         [Required]
         public decimal ImpScore { get; set; }
+        [Required]
+        public string OldHashID { get; set; }
+        [Required]
+        public string HashID { get; set; }
+        [Required]
+        public ArticleStatus Status { get; set; }
         public int ShareCount { get; set; }
 
         // Navigation properties

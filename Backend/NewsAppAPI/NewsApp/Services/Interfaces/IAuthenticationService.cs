@@ -8,5 +8,7 @@ namespace NewsApp.Services.Interfaces
     {
         Task<LoginReturnDTO> LoginUser(LoginGetDTO loginGetDTO);
         Task LogoutUser(string userId);
+        Task<RegisterReturnDTO> UserRegister(RegisterGetDTO userRegisterDTO);
+        Task<LoginReturnDTO> UserLogin(LoginGetDTO1 userLoginDTO);
     }
 }

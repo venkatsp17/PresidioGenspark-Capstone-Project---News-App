@@ -28,7 +28,7 @@ namespace NewsAppTest.RepositoryTests
         {
             var context = GetInMemoryDbContext();
             var _userRepository = new UserRepository(context);
-            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
+            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
 
             var result = await _userRepository.Add(newUser);
 
@@ -41,7 +41,7 @@ namespace NewsAppTest.RepositoryTests
         {
             var _context = GetInMemoryDbContext();
             var _userRepository = new UserRepository(_context);
-            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
+            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
 
             await _userRepository.Add(newUser);
             var userToDelete = _context.Users.First();
@@ -69,7 +69,7 @@ namespace NewsAppTest.RepositoryTests
         {
             var _context = GetInMemoryDbContext();
             var _userRepository = new UserRepository(_context);
-            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
+            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
 
             await _userRepository.Add(newUser);
             var userToUpdate = _context.Users.First();
@@ -90,7 +90,7 @@ namespace NewsAppTest.RepositoryTests
         {
             var _context = GetInMemoryDbContext();
             var _userRepository = new UserRepository(_context);
-            var userToUpdate = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
+            var userToUpdate = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
             userToUpdate.Email = "news@gmail.com";
 
             Assert.ThrowsAsync<ItemNotFoundException>(async () => await _userRepository.Update(userToUpdate, userToUpdate.UserID.ToString()));
@@ -101,7 +101,7 @@ namespace NewsAppTest.RepositoryTests
         {
             var _context = GetInMemoryDbContext();
             var _userRepository = new UserRepository(_context);
-            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
+            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
 
             await _userRepository.Add(newUser);
             var result = await _userRepository.GetAll("", "");
@@ -124,9 +124,9 @@ namespace NewsAppTest.RepositoryTests
         {
             var _context = GetInMemoryDbContext();
             var _userRepository = new UserRepository(_context);
-            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
-            var newUser1 = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 4 };
-            var newUser2 = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Admin, UserID = 5 };
+            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
+            var newUser1 = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 4, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
+            var newUser2 = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Admin, UserID = 5, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
 
             await _userRepository.Add(newUser);
             await _userRepository.Add(newUser1);
@@ -153,7 +153,7 @@ namespace NewsAppTest.RepositoryTests
             // Arrange
             var context = GetInMemoryDbContext();
             var repository = new UserRepository(context);
-            var user = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3 };
+            var user = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
