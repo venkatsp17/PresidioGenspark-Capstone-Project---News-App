@@ -17,7 +17,7 @@ namespace NewsApp.Services.Classes
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("FetchArticlesService is starting.");
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromHours(24));
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromMinutes(2));
             return Task.CompletedTask;
         }
 

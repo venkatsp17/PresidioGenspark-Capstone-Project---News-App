@@ -11,6 +11,7 @@ using NewsApp.DTOs;
 using NewsApp.Repositories.Classes;
 using NewsApp.Mappers;
 using Microsoft.Extensions.Caching.Memory;
+using System.Threading.Tasks;
 
 namespace NewsApp.Services.Classes
 {
@@ -34,6 +35,7 @@ namespace NewsApp.Services.Classes
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri("https://m.inshorts.com/en/read");
             _articlecategoryRepository = articlecategoryRepository;
             _cache = cache;
         }
@@ -153,24 +155,38 @@ namespace NewsApp.Services.Classes
                             throw new UnableToAddItemException();
                         }
                     }
-                    //Add topstories category here
+                    //Add Top Stories category to every article fetched
+                    ArticleCategory articleCategory1 = new ArticleCategory()
+                    {
+                        ArticleID = result.ArticleID,
+                        CategoryID = 28,
+                    };
+                    var articleCategoryResult1 = await _articlecategoryRepository.Add(articleCategory1);
+                    if (articleCategoryResult1.ArticleID == null)
+                    {
+                        throw new UnableToAddItemException();
+                    }
                 }
                 else
                 {
 
-                    existingArticle.Title = article.Title;
-                    existingArticle.Content = article.Content;
-                    existingArticle.Summary = article.Summary;
-                    existingArticle.ImgURL = article.ImgURL;
-                    existingArticle.AddedAt = article.AddedAt;
-                    existingArticle.OriginURL = article.OriginURL;
-                    existingArticle.CreatedAt = article.CreatedAt;
-                    existingArticle.ImpScore = article.ImpScore;
+                    if(existingArticle.HashID != hashId)
+                    {
+                        existingArticle.Title = article.Title;
+                        existingArticle.Content = article.Content;
+                        existingArticle.Summary = article.Summary;
+                        existingArticle.ImgURL = article.ImgURL;
+                        existingArticle.AddedAt = article.AddedAt;
+                        existingArticle.OriginURL = article.OriginURL;
+                        existingArticle.CreatedAt = article.CreatedAt;
+                        existingArticle.ImpScore = article.ImpScore;
 
-                    existingArticle.HashID = hashId;
-                    existingArticle.OldHashID = oldHashId;
+                        existingArticle.HashID = hashId;
+                        existingArticle.OldHashID = oldHashId;
+                        existingArticle.Status = ArticleStatus.Pending; //Edited article change status to pending
 
-                    await _articleRepository.Update(existingArticle, existingArticle.ArticleID.ToString());
+                        await _articleRepository.Update(existingArticle, existingArticle.ArticleID.ToString());
+                    }
                 }
             }
         }
@@ -199,6 +215,31 @@ namespace NewsApp.Services.Classes
                 Articles=paginatedArticles.Select(x => ArticleMapper.MapAdminArticleReturnDTO(x)),
                 totalpages=totalPages
             };
+        }
+
+
+        public async Task<AdminArticleReturnDTO> EditArticleData(AdminArticleReturnDTO adminArticleReturnDTO)
+        {
+            var article = await _articleRepository.Get("ArticleID", adminArticleReturnDTO.ArticleID.ToString());
+
+            if (article == null)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            article.Title = adminArticleReturnDTO.Title;
+            article.Content = adminArticleReturnDTO.Content;
+            article.ImgURL = adminArticleReturnDTO.ImgURL;
+            article.Summary = adminArticleReturnDTO.Summary;
+            article.OriginURL =adminArticleReturnDTO.OriginURL;
+            article.Status = ArticleStatus.Edited;
+
+            var result = await _articleRepository.Update(article, article.ArticleID.ToString());
+            if(result != null) { 
+                return ArticleMapper.MapAdminArticleReturnDTO(result);
+            }
+
+            throw new UnableToUpdateItemException();
         }
 
 

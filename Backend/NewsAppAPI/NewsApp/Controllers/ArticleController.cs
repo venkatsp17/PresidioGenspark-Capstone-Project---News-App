@@ -61,5 +61,31 @@ namespace NewsApp.Controllers
                 return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("editArticleDetails")]
+        [ProducesResponseType(typeof(AdminArticleReturnDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> EditArticleDetails(AdminArticleReturnDTO adminArticleReturnDTO)
+        {
+            try
+            {
+                var article = await _articleService.EditArticleData(adminArticleReturnDTO);
+                return Ok(article);
+            }
+            catch (ItemNotFoundException ex)
+            {
+                return UnprocessableEntity(new ErrorModel(422, ex.Message));
+            }
+            catch (UnableToUpdateItemException ex)
+            {
+                return UnprocessableEntity(new ErrorModel(422, ex.Message));
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
+            }
+        }
     }
 }

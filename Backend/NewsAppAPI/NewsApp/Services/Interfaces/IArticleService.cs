@@ -10,6 +10,8 @@ namespace NewsApp.Services.Interfaces
 
         Task<AdminArticleReturnDTO> ChangeArticleStatus(string articleId, ArticleStatus articleStatus);
 
+        Task<AdminArticleReturnDTO> EditArticleData(AdminArticleReturnDTO adminArticleReturnDTO);
+
         Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesAsync(int pageNumber, int pageSize, string status);
     }
 }

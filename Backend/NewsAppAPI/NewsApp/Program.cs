@@ -104,7 +104,7 @@ namespace NewsApp
                 config.AddDebug();
             });
             builder.Services.AddHostedService<FetchArticlesService>();
-
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             #endregion
 
