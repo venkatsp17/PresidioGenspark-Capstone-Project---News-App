@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NewsApp.DTOs;
 using NewsApp.Exceptions;
@@ -18,17 +19,17 @@ namespace NewsApp.Controllers
         {
             _articleService = articleService;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet("topstories")]
-        [ProducesResponseType(typeof(IEnumerable<AdminArticleReturnDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AdminArticlePaginatedReturnDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> TopStories(int pageno, int pagesize)
+        public async Task<IActionResult> TopStories(string status, int pageno=1, int pagesize=10)
         {
             try
             {
-                var articles = await _articleService.GetTopStoryArticlesAsync();
-                return Ok(articles);
+                var articles = await _articleService.GetPaginatedArticlesAsync(pageno, pagesize, status);
+                return Ok(articles); 
             }
             catch (UnableToAddItemException ex)
             {
@@ -39,7 +40,7 @@ namespace NewsApp.Controllers
                 return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("changeArticleStatus")]
         [ProducesResponseType(typeof(AdminArticleReturnDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]

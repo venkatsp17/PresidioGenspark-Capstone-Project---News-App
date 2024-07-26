@@ -18,47 +18,71 @@ namespace NewsApp.Controllers
         {
             _authenticationService = authenticationService;
         }
+        //[HttpPost("CreatePassword")]
+        //[ProducesResponseType(typeof(RegisterReturnDTO), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> CreatePassword(CreatePasswordDTO createPasswordDTO)
+        //{
+        //    try
+        //    {
+        //        var user = await _authenticationService.CreatePassword(createPasswordDTO);
+        //        return Ok(user);
+        //    }
+        //    catch (UnableToAddUserException ex)
+        //    {
+        //        return UnprocessableEntity(new ErrorModel(422, ex.Message));
+        //    }
+        //    catch (UnableToUpdateItemException ex)
+        //    {
+        //        return UnprocessableEntity(new ErrorModel(422, ex.Message));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
+        //    }
+        //}
 
-        [HttpPost("login")]
-        [ProducesResponseType(typeof(LoginReturnDTO), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Login([FromBody] LoginGetDTO loginGetDTO)
-        {
-            try
-            {
-                var user = await _authenticationService.LoginUser(loginGetDTO);
-                return Ok(user);
-            }
-            catch (UnableToAddItemException ex)
-            {
-                return UnprocessableEntity(new ErrorModel(422, ex.Message));
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
-            }
-        }
+        //[HttpPost("login")]
+        //[ProducesResponseType(typeof(LoginReturnDTO), StatusCodes.Status200OK)]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> Login([FromBody] LoginGetDTO loginGetDTO)
+        //{
+        //    try
+        //    {
+        //        var user = await _authenticationService.LoginUser(loginGetDTO);
+        //        return Ok(user);
+        //    }
+        //    catch (UnableToAddItemException ex)
+        //    {
+        //        return UnprocessableEntity(new ErrorModel(422, ex.Message));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
+        //    }
+        //}
 
-        [HttpPost("logout")]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Logout([FromBody] string userId)
-        {
-            try
-            {
-                await _authenticationService.LogoutUser(userId);
-                return Ok();
-            }
-            catch (UnableToUpdateItemException ex)
-            {
-                return UnprocessableEntity(new ErrorModel(422, ex.Message));
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
-            }
-        }
+        //[HttpPost("logout")]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> Logout([FromBody] string userId)
+        //{
+        //    try
+        //    {
+        //        await _authenticationService.LogoutUser(userId);
+        //        return Ok();
+        //    }
+        //    catch (UnableToUpdateItemException ex)
+        //    {
+        //        return UnprocessableEntity(new ErrorModel(422, ex.Message));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
+        //    }
+        //}
 
 
         [HttpPost("UserLogin")]

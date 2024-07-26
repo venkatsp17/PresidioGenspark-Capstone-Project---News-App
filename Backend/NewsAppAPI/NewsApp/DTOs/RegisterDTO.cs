@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static NewsApp.Models.Enum;
+
 
 namespace NewsApp.DTOs
 {

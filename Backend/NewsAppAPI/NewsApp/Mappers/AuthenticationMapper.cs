@@ -12,7 +12,6 @@ namespace NewsApp.Mappers
                UserID = user.UserID.ToString(),
                Email = user.Email,
                Name = user.Name,
-               OAuthToken = user.OAuthToken,
                Role = user.Role,
             };
         }

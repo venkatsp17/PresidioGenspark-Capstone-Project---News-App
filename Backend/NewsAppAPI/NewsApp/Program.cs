@@ -9,6 +9,7 @@ using NewsApp.Repositories.Classes;
 using NewsApp.Repositories.Interfaces;
 using NewsApp.Services.Classes;
 using NewsApp.Services.Interfaces;
+using System.Text;
 
 namespace NewsApp
 {
@@ -64,7 +65,18 @@ namespace NewsApp
             });
             });
 
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT"]))
+                };
 
+            });
             #region context
             builder.Services.AddDbContext<NewsAppDBContext>(
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection"))
@@ -84,7 +96,16 @@ namespace NewsApp
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IGoogleOAuthService, GoogleOAuthService>();
+            builder.Services.AddMemoryCache();
             builder.Services.AddScoped<IArticleService, ArticleService>();
+            builder.Services.AddLogging(config =>
+            {
+                config.AddConsole();
+                config.AddDebug();
+            });
+            builder.Services.AddHostedService<FetchArticlesService>();
+
+
             #endregion
 
             builder.Services.AddHttpClient();
@@ -101,6 +122,7 @@ namespace NewsApp
 
             app.UseCors("AllowSpecificOrigin");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

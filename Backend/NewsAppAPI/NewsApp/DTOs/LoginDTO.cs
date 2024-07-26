@@ -6,6 +6,17 @@ namespace NewsApp.DTOs
     public class LoginGetDTO
     {
         public string oAuthToken { get; set; }
+
+        public string email { get; set; }
+
+    }
+
+    public class CreatePasswordDTO
+    {
+        public string userID { get; set; }
+
+        public string Password { get; set; }
+
     }
 
     public class LoginGetDTO1

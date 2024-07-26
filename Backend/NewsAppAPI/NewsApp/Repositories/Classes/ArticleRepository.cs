@@ -84,6 +84,19 @@ namespace NewsApp.Repositories.Classes
                 var equalExpression = Expression.Equal(property, constantValue);
                 lambda = Expression.Lambda<Func<Article, bool>>(equalExpression, parameter);
             }
+            else if (key.ToLower().Contains("status"))
+            {
+                if (System.Enum.TryParse<ArticleStatus>(value, true, out var statusEnum))
+                {
+                    var constantValue = Expression.Constant(statusEnum);
+                    var equalExpression = Expression.Equal(property, constantValue);
+                    lambda = Expression.Lambda<Func<Article, bool>>(equalExpression, parameter);
+                }
+                else
+                {
+                    throw new ArgumentException($"Invalid status value: {value}", nameof(value));
+                }
+            }
             else
             {
                 var toLowerMethod = typeof(string).GetMethod("ToLower", Type.EmptyTypes);

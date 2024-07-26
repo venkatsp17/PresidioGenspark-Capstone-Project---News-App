@@ -10,6 +10,7 @@ using static NewsApp.Models.Enum;
 using NewsApp.DTOs;
 using NewsApp.Repositories.Classes;
 using NewsApp.Mappers;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace NewsApp.Services.Classes
 {
@@ -19,13 +20,22 @@ namespace NewsApp.Services.Classes
         private readonly IRepository<string, Category, string> _categoryRepository;
         private readonly IArticleCategoryRepository _articlecategoryRepository;
         private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _cache;
 
-        public ArticleService(IRepository<string, Article, string> articleRepository, HttpClient httpClient, IRepository<string, Category, string> categoryRepository, IArticleCategoryRepository articlecategoryRepository)
+        private const string MinNewsIdCacheKey = "MinNewsId";
+
+        public ArticleService(IRepository<string, Article, string> articleRepository, 
+            HttpClient httpClient, 
+            IRepository<string, Category, string> categoryRepository, 
+            IArticleCategoryRepository articlecategoryRepository,
+             IMemoryCache cache
+            )
         {
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _httpClient = httpClient;
             _articlecategoryRepository = articlecategoryRepository;
+            _cache = cache;
         }
 
         public async Task<AdminArticleReturnDTO> ChangeArticleStatus(string articleId, ArticleStatus articleStatus)
@@ -35,7 +45,6 @@ namespace NewsApp.Services.Classes
             {
                 throw new ItemNotFoundException();
             }
-            // Update existing article
             existingArticle.Status = articleStatus;
 
             var result = await _articleRepository.Update(existingArticle, existingArticle.ArticleID.ToString());
@@ -46,19 +55,27 @@ namespace NewsApp.Services.Classes
             return ArticleMapper.MapAdminArticleReturnDTO(result);             
         }
 
-        public async Task<IEnumerable<AdminArticleReturnDTO>> GetTopStoryArticlesAsync(int pageNumber = 1, int pageSize = 10)
+        public async Task FetchAndSaveArticlesAsync()
         {
+            var minNewsId = _cache.Get<string>(MinNewsIdCacheKey);
+            string url = minNewsId == null
+                ? "https://m.inshorts.com/api/in/en/news?category=top_stories&max_limit=10&include_card_data=true"
+                : $"https://m.inshorts.com/api/in/en/news?category=top_stories&max_limit=10&include_card_data=true&news_offset={minNewsId}";
 
-            var response = await _httpClient.GetStringAsync("https://m.inshorts.com/api/in/en/news?category=top_stories&max_limit=5&include_card_data=true");
+            var response = await _httpClient.GetStringAsync(url);
 
-            // Fetch articles from the third-party API
             var json = JObject.Parse(response);
             var newsList = json["data"]?["news_list"]?.ToArray();
+            var newMinNewsId = json["data"]?["min_news_id"]?.ToString();
 
+            if (!string.IsNullOrEmpty(newMinNewsId))
+            {
+                _cache.Set(MinNewsIdCacheKey, newMinNewsId);
+            }
 
             if (newsList == null || newsList.Length == 0)
             {
-                throw new ItemNotFoundException();
+                return;
             }
 
             foreach (var newsItem in newsList)
@@ -87,33 +104,32 @@ namespace NewsApp.Services.Classes
                     Status = ArticleStatus.Pending
                 };
 
-                // Determine the identifier to use for lookup
                 var existingArticle = version == 0
-                ? await _articleRepository.Get("HashID", hashId)
-                : await _articleRepository.Get("OldHashID", oldHashId);
+                    ? await _articleRepository.Get("HashID", hashId)
+                    : await _articleRepository.Get("OldHashID", oldHashId);
 
-                if(existingArticle == null)
+                if (existingArticle == null)
                 {
                     var result = await _articleRepository.Add(article);
                     if (result.ArticleID == null)
                     {
                         throw new UnableToAddItemException();
                     }
+
                     foreach (var category in categories)
                     {
                         string category1 = (string)category;
                         int CategoryID;
 
-                        var validcategory = await _categoryRepository.Get("Description", category1);
-                        if(validcategory == null)
+                        var validCategory = await _categoryRepository.Get("Description", category1);
+                        if (validCategory == null)
                         {
-                            Category newcategory = new Category()
+                            Category newCategory = new Category()
                             {
                                 Description = category1,
                                 Name = char.ToUpper(category1[0]) + category1.Substring(1).ToLower()
-
                             };
-                            var result1 = await _categoryRepository.Add(newcategory);
+                            var result1 = await _categoryRepository.Add(newCategory);
                             if (result1.CategoryID == null)
                             {
                                 throw new UnableToAddItemException();
@@ -122,7 +138,7 @@ namespace NewsApp.Services.Classes
                         }
                         else
                         {
-                            CategoryID = validcategory.CategoryID;
+                            CategoryID = validCategory.CategoryID;
                         }
 
                         ArticleCategory articleCategory = new ArticleCategory()
@@ -131,16 +147,17 @@ namespace NewsApp.Services.Classes
                             CategoryID = CategoryID,
                         };
 
-                        var articlecategory = await _articlecategoryRepository.Add(articleCategory);
-                        if (articlecategory.ArticleID == null)
+                        var articleCategoryResult = await _articlecategoryRepository.Add(articleCategory);
+                        if (articleCategoryResult.ArticleID == null)
                         {
                             throw new UnableToAddItemException();
                         }
                     }
+                    //Add topstories category here
                 }
                 else
                 {
-                    // Update existing article
+
                     existingArticle.Title = article.Title;
                     existingArticle.Content = article.Content;
                     existingArticle.Summary = article.Summary;
@@ -150,30 +167,25 @@ namespace NewsApp.Services.Classes
                     existingArticle.CreatedAt = article.CreatedAt;
                     existingArticle.ImpScore = article.ImpScore;
 
-                    // Update both HashID and OldHashID
                     existingArticle.HashID = hashId;
                     existingArticle.OldHashID = oldHashId;
 
                     await _articleRepository.Update(existingArticle, existingArticle.ArticleID.ToString());
                 }
-      
             }
-
-            // Return paginated articles sorted by CreatedAt descending
-            return await GetPaginatedArticlesAsync(pageNumber, pageSize);
         }
 
-        private async Task<IEnumerable<AdminArticleReturnDTO>> GetPaginatedArticlesAsync(int pageNumber, int pageSize)
+        public async Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesAsync(int pageNumber, int pageSize, string status)
         {
-            // Fetch all articles
-            var allArticles = await _articleRepository.GetAll("","");
+
+            var allArticles = await _articleRepository.GetAll("Status", status);
 
             if (allArticles == null || allArticles.Count() == 0)
             {
                 throw new NoAvailableItemException();
             }
 
-            // Calculate the skip and take parameters for pagination
+
             int skip = (pageNumber - 1) * pageSize;
 
             var paginatedArticles = allArticles
@@ -181,7 +193,12 @@ namespace NewsApp.Services.Classes
                .Skip(skip)
                .Take(pageSize);
 
-            return paginatedArticles.Select(x => ArticleMapper.MapAdminArticleReturnDTO(x));
+            var totalPages = (int)Math.Ceiling(allArticles.Count() / (double)pageSize);
+
+            return new AdminArticlePaginatedReturnDTO{
+                Articles=paginatedArticles.Select(x => ArticleMapper.MapAdminArticleReturnDTO(x)),
+                totalpages=totalPages
+            };
         }
 
 

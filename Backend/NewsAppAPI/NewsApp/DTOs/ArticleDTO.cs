@@ -21,4 +21,14 @@ namespace NewsApp.DTOs
         public int ShareCount { get; set; }
 
     }
+
+
+    public class AdminArticlePaginatedReturnDTO
+    {
+
+        public IEnumerable<AdminArticleReturnDTO> Articles { get; set; }
+
+        public int totalpages { get; set; }
+
+    }
 }

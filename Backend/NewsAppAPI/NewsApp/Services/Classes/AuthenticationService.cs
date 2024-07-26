@@ -24,13 +24,38 @@ namespace NewsApp.Services.Classes
             _tokenService = tokenService;
         }
 
+        public async Task<RegisterReturnDTO> CreatePassword(CreatePasswordDTO createPasswordDTO)
+        {
+            var user = await _userRepository.Get("UserID", createPasswordDTO.userID);
+            if(user == null)
+            {
+                throw new UnableToAddUserException();
+            }
+            if(user.Password.Length != 0)
+            {
+                throw new UnableToAddUserException();
+            }
+            HMACSHA512 hMACSHA = new HMACSHA512();
+            user.Password_Hashkey = hMACSHA.Key;
+            user.Password = hMACSHA.ComputeHash(Encoding.UTF8.GetBytes(createPasswordDTO.Password));
+            var result = await _userRepository.Update(user, user.UserID.ToString());
+            if (result == null)
+            {
+                throw new UnableToUpdateItemException();
+            }
+            return MapCustomerToRegisterReturnDTO(result);
+        }
+
 
         public async Task<LoginReturnDTO> LoginUser(LoginGetDTO loginGetDTO)
         {
             var payload = await _googleOAuthService.ValidateGoogleTokenAsync(loginGetDTO.oAuthToken);
 
-
-            var user = await _userRepository.Get("OAuthID", payload.Subject);
+            if(payload.Subject== null)
+            {
+                throw new UnauthorizedUserException();
+            }
+            var user = await _userRepository.Get("Email", loginGetDTO.email);
             if(user == null)
             {
                 var user1 = new User
@@ -39,7 +64,9 @@ namespace NewsApp.Services.Classes
                     Name = payload.Name,
                     OAuthID = payload.Subject,
                     OAuthToken = loginGetDTO.oAuthToken,
-                    Role = UserType.Reader
+                    Role = UserType.Reader,
+                    Password = Encoding.UTF8.GetBytes(""),
+                    Password_Hashkey = Encoding.UTF8.GetBytes(""),
                 };
 
                 var result = await _userRepository.Add(user1);
@@ -47,7 +74,8 @@ namespace NewsApp.Services.Classes
                 {
                     throw new UnableToAddUserException();
                 }
-                return AuthenticationMapper.MapToLoginReturnDTO(result);
+                LoginReturnDTO loginReturnDTO = AuthenticationMapper.MapToLoginReturnDTO(result);
+                return loginReturnDTO;
             }
             else
             {
@@ -60,7 +88,9 @@ namespace NewsApp.Services.Classes
                         throw new UnableToUpdateItemException();
                     }
                 }
-                return AuthenticationMapper.MapToLoginReturnDTO(user);
+                LoginReturnDTO loginReturnDTO = AuthenticationMapper.MapToLoginReturnDTO(user);
+                loginReturnDTO.Token = _tokenService.GenerateToken(user);
+                return loginReturnDTO;
             }
         }
 
