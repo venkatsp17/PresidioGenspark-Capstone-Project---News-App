@@ -85,7 +85,7 @@ namespace NewsApp
 
             #region Repositories
             builder.Services.AddScoped<IRepository<string,User,string>, UserRepository>();
-            builder.Services.AddScoped<IRepository<string, Article, string>, ArticleRepository>();
+            builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<IRepository<string, Comment, string>, CommentRepository>();
             builder.Services.AddScoped<IRepository<string, Category, string>, CategoryRepository>();
             builder.Services.AddScoped<IRepository<string, SavedArticle, string>, SavedArticleRepository>();
@@ -103,7 +103,8 @@ namespace NewsApp
                 config.AddConsole();
                 config.AddDebug();
             });
-            builder.Services.AddHostedService<FetchArticlesService>();
+            //builder.Services.AddHostedService<FetchArticlesService>();
+            //builder.Services.AddHostedService<FetchArticleCategoryService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             #endregion

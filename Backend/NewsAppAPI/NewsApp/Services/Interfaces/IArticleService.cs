@@ -6,12 +6,15 @@ namespace NewsApp.Services.Interfaces
 {
     public interface IArticleService
     {
+        Task FetchAndSaveCategoryArticlesAsync();
         Task FetchAndSaveArticlesAsync();
 
         Task<AdminArticleReturnDTO> ChangeArticleStatus(string articleId, ArticleStatus articleStatus);
 
         Task<AdminArticleReturnDTO> EditArticleData(AdminArticleReturnDTO adminArticleReturnDTO);
 
-        Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesAsync(int pageNumber, int pageSize, string status);
+        Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesAsync(int pageNumber, int pageSize, string status, int categoryID);
+
+        Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesForUserAsync(int pageNumber, int pageSize, int categoryID);
     }
 }

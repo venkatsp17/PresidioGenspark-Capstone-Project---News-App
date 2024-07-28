@@ -11,6 +11,8 @@ namespace NewsApp.Models
         [Required]
         public string Name { get; set; }
         public string Description { get; set; }
+        [Required]
+        public string Type { get; set; }
 
         // Navigation properties
         public ICollection<ArticleCategory> ArticleCategories { get; set; }

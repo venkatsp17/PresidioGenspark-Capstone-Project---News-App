@@ -2,13 +2,14 @@
 
 namespace NewsApp.Services.Classes
 {
-    public class FetchArticlesService : IHostedService, IDisposable
+    public class FetchArticleCategoryService : IHostedService, IDisposable
     {
+
         private Timer _timer;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<FetchArticlesService> _logger;
+        private readonly ILogger<FetchArticleCategoryService> _logger;
 
-        public FetchArticlesService(IServiceScopeFactory scopeFactory, ILogger<FetchArticlesService> logger)
+        public FetchArticleCategoryService(IServiceScopeFactory scopeFactory, ILogger<FetchArticleCategoryService> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -16,27 +17,27 @@ namespace NewsApp.Services.Classes
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("FetchArticlesService is starting.");
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromHours(1));
+            _logger.LogInformation("FetchArticlesTwoHourlyService is starting.");
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromHours(2));
             return Task.CompletedTask;
         }
 
         private void DoWork(object state)
         {
-            _logger.LogInformation("FetchArticlesService is working. Time: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("FetchArticlesTwoHourlyService is working. Time: {time}", DateTimeOffset.Now);
 
             using (var scope = _scopeFactory.CreateScope())
             {
                 var articleService = scope.ServiceProvider.GetRequiredService<IArticleService>();
-                articleService.FetchAndSaveArticlesAsync().Wait();
+                articleService.FetchAndSaveCategoryArticlesAsync().Wait();
             }
 
-            _logger.LogInformation("FetchArticlesService completed work. Time: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("FetchArticlesTwoHourlyService completed work. Time: {time}", DateTimeOffset.Now);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("FetchArticlesService is stopping.");
+            _logger.LogInformation("FetchArticlesTwoHourlyService is stopping.");
             _timer?.Change(Timeout.Infinite, 0);
             return Task.CompletedTask;
         }
@@ -46,5 +47,4 @@ namespace NewsApp.Services.Classes
             _timer?.Dispose();
         }
     }
-
 }

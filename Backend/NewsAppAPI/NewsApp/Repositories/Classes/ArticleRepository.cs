@@ -10,7 +10,7 @@ using NewsApp.Repositories.Interfaces;
 
 namespace NewsApp.Repositories.Classes
 {
-    public class ArticleRepository : IRepository<string, Article, string>
+    public class ArticleRepository : IArticleRepository
     {
         protected readonly NewsAppDBContext _context;
         private readonly DbSet<Article> _dbSet;
@@ -113,6 +113,24 @@ namespace NewsApp.Repositories.Classes
 
         }
 
+        public async Task<IEnumerable<Article>> GetAllApprcvedEditedArticlesAndCategoryAsync(int categoryID)
+        {
+            return await _context.Articles
+                               .Include(a => a.ArticleCategories)
+                               .Where(a => (a.Status == ArticleStatus.Approved)  &&
+                                           a.ArticleCategories.Any(ac => ac.CategoryID == categoryID))
+                               .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetAllByStatusAndCategoryAsync(ArticleStatus status, int categoryID)
+        {
+            return await _context.Articles
+                                .Include(a => a.ArticleCategories)
+                                .Where(a => a.Status == status &&
+                                            a.ArticleCategories.Any(ac => ac.CategoryID == categoryID))
+                                .ToListAsync();
+        }
+
         public async Task<Article> Update(Article item, string key)
         {
             var entity = await _dbSet.FindAsync(int.Parse(key));
@@ -123,5 +141,7 @@ namespace NewsApp.Repositories.Classes
             }
             return item;
         }
+
+
     }
 }

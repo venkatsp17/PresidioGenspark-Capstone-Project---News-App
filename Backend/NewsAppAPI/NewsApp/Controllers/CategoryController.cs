@@ -19,7 +19,6 @@ namespace NewsApp.Controllers
             _categoryService = categoryService;
         }
 
-        [Authorize]
         [HttpGet("getAllCategories")]
         [ProducesResponseType(typeof(IEnumerable<CategoryDTO>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
