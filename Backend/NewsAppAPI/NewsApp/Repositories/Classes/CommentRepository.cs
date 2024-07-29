@@ -91,7 +91,7 @@ namespace NewsApp.Repositories.Classes
                 lambda = Expression.Lambda<Func<Comment, bool>>(containsExpression, parameter);
             }
 
-            var result = await _dbSet.Where(lambda).ToListAsync();
+            var result = await _dbSet.Include(u=>u.User).Where(lambda).ToListAsync();
 
             return result;
 

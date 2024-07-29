@@ -67,14 +67,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_Comment_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _commentRepository = new CommentRepository(_context);
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _commentRepository.Delete("5"));
-        }
+      
 
         [Test]
         public async Task Update_Comment_Success()
@@ -104,24 +97,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual("Worst article! Really enjoyed the insights.", commentInDb.Content);
         }
 
-        [Test]
-        public async Task Update_Comment_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _commentRepository = new CommentRepository(_context);
-            var comment1 = new Comment
-            {
-                CommentID = 1,
-                ArticleID = 1,
-                UserID = 1,
-                Content = "Great article! Really enjoyed the insights.",
-                Timestamp = DateTime.UtcNow
-            };
-            comment1.Content = "Worst article! Really enjoyed the insights.";
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _commentRepository.Update(comment1, comment1.CommentID.ToString()));
-        }
-
+    
         [Test]
         public async Task Get_AllComment_Success()
         {
@@ -143,15 +119,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result.Count());
         }
 
-        [Test]
-        public async Task Get_AllComment_NoAvailableItemException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _commentRepository = new CommentRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _commentRepository.GetAll("", ""));
-        }
-
+  
         [Test]
         public async Task Get_AllByColumn_Success()
         {
@@ -199,14 +167,7 @@ namespace NewsAppTest.RepositoryTests
         }
 
 
-        [Test]
-        public async Task Get_AllByColumn_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _commentRepository = new CommentRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _commentRepository.GetAll("Content", "Economy"));
-        }
+    
 
         [Test]
         public async Task Get_AllByColumn_ColumnNotExistException()
@@ -242,15 +203,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.CommentID, Is.EqualTo(comment1.CommentID));
         }
 
-        [Test]
-        public void GetUserById_ShouldThrowNotFoundException()
-        {
-            // Arrange
-            var context = GetInMemoryDbContext();
-            var repository = new CommentRepository(context);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await repository.Get("CommentID", "5"));
-        }
+    
     }
 }

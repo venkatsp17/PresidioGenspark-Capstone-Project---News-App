@@ -16,5 +16,6 @@ namespace NewsApp.Services.Interfaces
         Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesAsync(int pageNumber, int pageSize, string status, int categoryID);
 
         Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesForUserAsync(int pageNumber, int pageSize, int categoryID);
+
     }
 }

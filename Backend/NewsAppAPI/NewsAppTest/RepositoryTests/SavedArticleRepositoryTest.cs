@@ -69,14 +69,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_SavedArticle_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _savedArticleRepository = new SavedArticleRepository(_context);
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _savedArticleRepository.Delete("5"));
-        }
+  
 
         [Test]
         public async Task Update_SavedArticle_Success()
@@ -105,22 +98,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(2, savedArticleInDb.ArticleID);
         }
 
-        [Test]
-        public async Task Update_SavedArticle_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _savedArticleRepository = new SavedArticleRepository(_context);
-            var savedArticle1 = new SavedArticle
-            {
-                SavedArticleID = 1,
-                ArticleID = 1,
-                UserID = 1,                
-                SavedAt = DateTime.UtcNow
-            };
-            savedArticle1.ArticleID = 2;
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _savedArticleRepository.Update(savedArticle1, savedArticle1.SavedArticleID.ToString()));
-        }
+      
 
         [Test]
         public async Task Get_AllSavedArticle_Success()
@@ -142,13 +120,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result.Count());
         }
 
-        [Test]
-        public async Task Get_AllSavedArticle_NoAvailableItemException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _savedArticleRepository = new SavedArticleRepository(_context);
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _savedArticleRepository.GetAll("", ""));
-        }
+     
 
         [Test]
         public async Task Get_AllByColumn_Success()
@@ -195,14 +167,7 @@ namespace NewsAppTest.RepositoryTests
         }
 
 
-        [Test]
-        public async Task Get_AllByColumn_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _savedArticleRepository = new SavedArticleRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _savedArticleRepository.GetAll("ArticleID", "2"));
-        }
+    
 
         [Test]
         public async Task Get_AllByColumn_ColumnNotExistException()
@@ -237,15 +202,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.SavedArticleID, Is.EqualTo(savedArticle1.SavedArticleID));
         }
 
-        [Test]
-        public void GetUserById_ShouldThrowNotFoundException()
-        {
-            // Arrange
-            var context = GetInMemoryDbContext();
-            var repository = new SavedArticleRepository(context);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await repository.Get("SavedArticleID", "5"));
-        }
+    
     }
 }

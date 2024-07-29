@@ -30,7 +30,7 @@ namespace NewsApp.Models
         public string HashID { get; set; }
         [Required]
         public ArticleStatus Status { get; set; }
-        public int ShareCount { get; set; }
+        public int SaveCount { get; set; }
 
         // Navigation properties
         public ICollection<Comment> Comments { get; set; }

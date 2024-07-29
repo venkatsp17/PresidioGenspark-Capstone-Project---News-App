@@ -112,5 +112,6 @@ namespace NewsApp.Controllers
                 return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
             }
         }
+
     }
 }

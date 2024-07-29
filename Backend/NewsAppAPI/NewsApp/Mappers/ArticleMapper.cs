@@ -19,7 +19,7 @@ namespace NewsApp.Mappers
                 CreatedAt = article.CreatedAt,
                 ImpScore = article.ImpScore,
                 Status = article.Status,
-                ShareCount = article.ShareCount,
+                SaveCount = article.SaveCount,
 
             };
         }

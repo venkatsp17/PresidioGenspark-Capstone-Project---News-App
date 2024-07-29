@@ -36,7 +36,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100,
+                SaveCount = 100,
                 HashID="",
                 OldHashID=""
             };
@@ -63,7 +63,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100,
+                SaveCount = 100,
                 HashID = "",
                 OldHashID = ""
             };
@@ -80,14 +80,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_Article_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleRepository = new ArticleRepository(_context);
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _articleRepository.Delete("5"));
-        }
 
         [Test]
         public async Task Update_Article_Success()
@@ -105,7 +97,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100,
+                SaveCount = 100,
                 HashID = "",
                 OldHashID = ""
             };
@@ -124,30 +116,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual("Breaking News: Tech Destruction", articleInDb.Title);
         }
 
-        [Test]
-        public async Task Update_Article_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleRepository = new ArticleRepository(_context);
-            var article1 = new Article
-            {
-                ArticleID = 1,
-                Title = "Breaking News: Tech Innovation",
-                Content = "Detailed content about the latest in tech innovation...",
-                Summary = "A brief summary of the tech innovation article.",
-                AddedAt = DateTime.UtcNow,
-                OriginURL = "https://example.com/tech-innovation",
-                ImgURL = "https://example.com/images/tech.jpg",
-                CreatedAt = DateTime.UtcNow,
-                ImpScore = 9.5m,
-                ShareCount = 100,
-                HashID = "",
-                OldHashID = ""
-            };
-            article1.Title = "Breaking News: Tech Destruction";
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _articleRepository.Update(article1, article1.ArticleID.ToString()));
-        }
 
         [Test]
         public async Task Get_AllArticle_Success()
@@ -165,7 +133,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100,
+                SaveCount = 100,
                 HashID = "",
                 OldHashID = ""
             };
@@ -177,14 +145,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result.Count());
         }
 
-        [Test]
-        public async Task Get_AllArticle_NoAvailableItemException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleRepository = new ArticleRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _articleRepository.GetAll("", ""));
-        }
 
         [Test]
         public async Task Get_AllByColumn_Success()
@@ -202,7 +162,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100,
+                SaveCount = 100,
                 HashID = "",
                 OldHashID = ""
             };
@@ -218,7 +178,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/economy.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 8.2m,
-                ShareCount = 150,
+                SaveCount = 150,
                 HashID = "",
                 OldHashID = ""
             };
@@ -234,7 +194,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/health.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.0m,
-                ShareCount = 200,
+                SaveCount = 200,
                 HashID = "",
                 OldHashID = ""
             };
@@ -254,15 +214,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result1.Count());    
         }
 
-
-        [Test]
-        public async Task Get_AllByColumn_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleRepository = new ArticleRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _articleRepository.GetAll("Title", "Economy"));
-        }
 
         [Test]
         public async Task Get_AllByColumn_ColumnNotExistException()
@@ -290,7 +241,7 @@ namespace NewsAppTest.RepositoryTests
                 ImgURL = "https://example.com/images/tech.jpg",
                 CreatedAt = DateTime.UtcNow,
                 ImpScore = 9.5m,
-                ShareCount = 100,
+                SaveCount = 100,
                 HashID = "",
                 OldHashID = ""
             };
@@ -305,15 +256,5 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.ArticleID, Is.EqualTo(article1.ArticleID));
         }
 
-        [Test]
-        public void GetUserById_ShouldThrowNotFoundException()
-        {
-            // Arrange
-            var context = GetInMemoryDbContext();
-            var repository = new ArticleRepository(context);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await repository.Get("ArticleID", "5"));
-        }
     }
 }

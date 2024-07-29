@@ -10,5 +10,6 @@ namespace NewsApp.Repositories.Interfaces
         Task<IEnumerable<Article>> GetAllByStatusAndCategoryAsync(ArticleStatus article, int categoryID);
 
         Task<IEnumerable<Article>> GetAllApprcvedEditedArticlesAndCategoryAsync(int categoryID);
+
     }
 }

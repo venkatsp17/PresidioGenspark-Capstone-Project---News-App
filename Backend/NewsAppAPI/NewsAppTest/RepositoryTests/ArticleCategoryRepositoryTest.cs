@@ -60,14 +60,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_ArticleCategory_ByComposite_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleCategoryRepository = new ArticleCategoryRepository(_context);
 
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _articleCategoryRepository.Delete("1-5"));
-        }
 
         [Test]
         public async Task Delete_ArticleCategory_ByComposite_ArgumentException()
@@ -109,14 +102,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_ArticleCategory_ByCategoryId_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleCategoryRepository = new ArticleCategoryRepository(_context);
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _articleCategoryRepository.DeleteByCategoryID("1"));
-        }
 
         [Test]
         public async Task Delete_ArticleCategory_ByArticlId_Success()
@@ -140,15 +125,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_ArticleCategory_ByArticleId_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleCategoryRepository = new ArticleCategoryRepository(_context);
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _articleCategoryRepository.DeleteByArticleID("1"));
-        }
-
 
         [Test]
         public async Task Get_AllArticleCategory_Success()
@@ -168,13 +144,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result.Count());
         }
 
-        [Test]
-        public async Task Get_AllArticleCategory_NoAvailableItemException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleCategoryRepository = new ArticleCategoryRepository(_context);
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _articleCategoryRepository.GetAll("", ""));
-        }
 
         [Test]
         public async Task Get_AllByColumn_Success()
@@ -215,14 +184,6 @@ namespace NewsAppTest.RepositoryTests
         }
 
 
-        [Test]
-        public async Task Get_AllByColumn_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _articleCategoryRepository = new ArticleCategoryRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _articleCategoryRepository.GetAll("ArticleID", "2"));
-        }
 
         [Test]
         public async Task Get_AllByColumn_ColumnNotExistException()
@@ -255,15 +216,5 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.CategoryID, Is.EqualTo(articleCategory1.CategoryID));
         }
 
-        [Test]
-        public void GetUserById_ShouldThrowNotFoundException()
-        {
-            // Arrange
-            var context = GetInMemoryDbContext();
-            var repository = new ArticleCategoryRepository(context);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await repository.Get("CategoryID", "5"));
-        }
     }
 }

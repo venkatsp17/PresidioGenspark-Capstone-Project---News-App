@@ -122,6 +122,7 @@ namespace NewsApp.Repositories.Classes
                                .ToListAsync();
         }
 
+
         public async Task<IEnumerable<Article>> GetAllByStatusAndCategoryAsync(ArticleStatus status, int categoryID)
         {
             return await _context.Articles

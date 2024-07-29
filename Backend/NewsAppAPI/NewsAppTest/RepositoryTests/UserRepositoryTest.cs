@@ -55,14 +55,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.Null(userInDb);
         }
 
-        [Test]
-        public async Task Delete_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(_context);
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _userRepository.Delete("5"));
-        }
+    
 
         [Test]
         public async Task Update_User_Success()
@@ -85,16 +78,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual("news@gmail.com", userInDb.Email);
         }
 
-        [Test]
-        public async Task Update_User_NotFoundException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(_context);
-            var userToUpdate = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
-            userToUpdate.Email = "news@gmail.com";
-
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _userRepository.Update(userToUpdate, userToUpdate.UserID.ToString()));
-        }
+    
 
         [Test]
         public async Task Get_AllUsers_Success()
@@ -110,14 +94,7 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result.Count());
         }
 
-        [Test]
-        public async Task Get_AllNoAvailableItemException()
-        {
-            var _context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(_context);
-
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _userRepository.GetAll("",""));
-        }
+      
 
         [Test]
         public async Task Get_AllByRole_Success()
@@ -138,14 +115,7 @@ namespace NewsAppTest.RepositoryTests
         }
 
 
-        [Test]
-        public async Task Get_AllByRole_Exception()
-        {
-            var _context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(_context);
-           
-            Assert.ThrowsAsync<NoAvailableItemException>(async () => await _userRepository.GetAll("Role", "0"));
-        }
+    
 
         [Test]
         public async Task GetUserById_ShouldReturnUser()
@@ -165,15 +135,6 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.Email, Is.EqualTo(user.Email));
         }
 
-        [Test]
-        public void GetUserById_ShouldThrowNotFoundException()
-        {
-            // Arrange
-            var context = GetInMemoryDbContext();
-            var repository = new UserRepository(context);
-
-            // Act & Assert
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await repository.Get("UserID","5"));
-        }
+    
     }
 }

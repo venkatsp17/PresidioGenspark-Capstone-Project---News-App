@@ -120,7 +120,7 @@ namespace NewsApp.Services.Classes
                         ImgURL = (string)newsObj["image_url"],
                         CreatedAt = DateTimeOffset.FromUnixTimeMilliseconds((long)newsObj["created_at"]).UtcDateTime,
                         ImpScore = (decimal)newsObj["impressive_score"],
-                        ShareCount = 0,
+                        SaveCount = 0,
                         Status = ArticleStatus.Pending
                     };
 
@@ -292,7 +292,7 @@ namespace NewsApp.Services.Classes
                         ImgURL = (string)newsObj["image_url"],
                         CreatedAt = DateTimeOffset.FromUnixTimeMilliseconds((long)newsObj["created_at"]).UtcDateTime,
                         ImpScore = (decimal)newsObj["impressive_score"],
-                        ShareCount = 0,
+                        SaveCount = 0,
                         Status = ArticleStatus.Pending
                     };
 
@@ -426,7 +426,6 @@ namespace NewsApp.Services.Classes
         public async Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesForUserAsync(int pageNumber, int pageSize, int categoryID)
         {
 
-         
             var allArticles = await _articleRepository.GetAllApprcvedEditedArticlesAndCategoryAsync(categoryID);
 
 
@@ -451,6 +450,7 @@ namespace NewsApp.Services.Classes
                 totalpages = totalPages
             };
         }
+
 
         public async Task<AdminArticleReturnDTO> EditArticleData(AdminArticleReturnDTO adminArticleReturnDTO)
         {

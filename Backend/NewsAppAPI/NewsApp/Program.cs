@@ -31,12 +31,18 @@ namespace NewsApp
                     {
                         builder.WithOrigins("http://127.0.0.1:3000", "http://localhost:3000", "http://localhost", "http://127.0.0.1")
                                .AllowAnyHeader()
-                               .AllowAnyMethod();
+                               .AllowAnyMethod()
+                               .AllowCredentials(); // This line is crucial for allowing credentials
                     });
             });
             #endregion
 
             builder.Services.AddControllers();
+
+            // Add SignalR
+            builder.Services.AddSignalR();
+
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(option =>
             {
@@ -50,19 +56,19 @@ namespace NewsApp
                     Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
                 });
                 option.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
                 {
-                    new OpenApiSecurityScheme
                     {
-                        Reference = new OpenApiReference
+                        new OpenApiSecurityScheme
                         {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] { }
-                }
-            });
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
             });
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -75,8 +81,23 @@ namespace NewsApp
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT"]))
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/commentHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
 
             });
+
             #region context
             builder.Services.AddDbContext<NewsAppDBContext>(
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection"))
@@ -84,7 +105,7 @@ namespace NewsApp
             #endregion
 
             #region Repositories
-            builder.Services.AddScoped<IRepository<string,User,string>, UserRepository>();
+            builder.Services.AddScoped<IRepository<string, User, string>, UserRepository>();
             builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<IRepository<string, Comment, string>, CommentRepository>();
             builder.Services.AddScoped<IRepository<string, Category, string>, CategoryRepository>();
@@ -106,12 +127,15 @@ namespace NewsApp
             //builder.Services.AddHostedService<FetchArticlesService>();
             //builder.Services.AddHostedService<FetchArticleCategoryService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ICommentService, CommentService>();
 
             #endregion
 
             builder.Services.AddHttpClient();
 
             var app = builder.Build();
+
+            app.UseRouting();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -120,14 +144,13 @@ namespace NewsApp
                 app.UseSwaggerUI();
             }
 
-
             app.UseCors("AllowSpecificOrigin");
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-
             app.MapControllers();
+            app.MapHub<CommentHub>("/commentHub").RequireAuthorization();
 
             app.Run();
         }

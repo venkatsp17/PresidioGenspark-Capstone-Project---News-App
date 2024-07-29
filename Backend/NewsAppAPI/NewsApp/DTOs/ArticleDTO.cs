@@ -18,7 +18,7 @@ namespace NewsApp.DTOs
         public DateTime CreatedAt { get; set; }
         public decimal ImpScore { get; set; }
         public ArticleStatus Status { get; set; }
-        public int ShareCount { get; set; }
+        public int SaveCount { get; set; }
 
     }
 
@@ -31,4 +31,6 @@ namespace NewsApp.DTOs
         public int totalpages { get; set; }
 
     }
+
+ 
 }
