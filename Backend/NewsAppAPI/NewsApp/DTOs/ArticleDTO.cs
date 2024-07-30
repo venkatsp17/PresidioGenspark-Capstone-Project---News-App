@@ -20,6 +20,10 @@ namespace NewsApp.DTOs
         public ArticleStatus Status { get; set; }
         public int SaveCount { get; set; }
 
+        public bool isSaved { get; set; }
+
+        public int CommentCount { get; set; }
+
     }
 
 

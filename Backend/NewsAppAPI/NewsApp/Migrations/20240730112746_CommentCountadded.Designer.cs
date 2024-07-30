@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsApp.Contexts;
 
@@ -11,9 +12,10 @@ using NewsApp.Contexts;
 namespace NewsApp.Migrations
 {
     [DbContext(typeof(NewsAppDBContext))]
-    partial class NewsAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240730112746_CommentCountadded")]
+    partial class CommentCountadded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,9 +65,6 @@ namespace NewsApp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SaveCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ShareCount")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -181,29 +180,6 @@ namespace NewsApp.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("SavedArticles");
-                });
-
-            modelBuilder.Entity("NewsApp.Models.ShareData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("ArticleID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ShareDatas");
                 });
 
             modelBuilder.Entity("NewsApp.Models.User", b =>

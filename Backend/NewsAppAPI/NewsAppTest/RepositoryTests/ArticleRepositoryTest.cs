@@ -3,6 +3,7 @@ using NewsApp.Contexts;
 using NewsApp.Exceptions;
 using NewsApp.Models;
 using NewsApp.Repositories.Classes;
+using static NewsApp.Models.Enum;
 
 namespace NewsAppTest.RepositoryTests
 {
@@ -147,7 +148,7 @@ namespace NewsAppTest.RepositoryTests
 
 
         [Test]
-        public async Task Get_AllByColumn_Success()
+        public async Task Get_AllByColumnStatus_Success()
         {
             var _context = GetInMemoryDbContext();
             var _articleRepository = new ArticleRepository(_context);
@@ -164,7 +165,8 @@ namespace NewsAppTest.RepositoryTests
                 ImpScore = 9.5m,
                 SaveCount = 100,
                 HashID = "",
-                OldHashID = ""
+                OldHashID = "",
+                Status= ArticleStatus.Approved
             };
 
             var article2 = new Article
@@ -180,7 +182,8 @@ namespace NewsAppTest.RepositoryTests
                 ImpScore = 8.2m,
                 SaveCount = 150,
                 HashID = "",
-                OldHashID = ""
+                OldHashID = "",
+                Status = ArticleStatus.Approved
             };
 
             var article3 = new Article
@@ -196,7 +199,8 @@ namespace NewsAppTest.RepositoryTests
                 ImpScore = 9.0m,
                 SaveCount = 200,
                 HashID = "",
-                OldHashID = ""
+                OldHashID = "",
+                Status = ArticleStatus.Rejected
             };
 
 
@@ -207,13 +211,188 @@ namespace NewsAppTest.RepositoryTests
 
             var result1 = await _articleRepository.GetAll("ArticleID", "3");
 
+            var result2 = await _articleRepository.GetAll("Status", "2");
+
             Assert.NotNull(result);
             Assert.AreEqual(2, result.Count());
 
             Assert.NotNull(result1);
-            Assert.AreEqual(1, result1.Count());    
+            Assert.AreEqual(1, result1.Count());
+
+            Assert.NotNull(result2);
+            Assert.AreEqual(2, result2.Count());
+
+
+            Assert.ThrowsAsync<ArgumentException>(async () => await _articleRepository.GetAll("Status", "1fds"));
         }
 
+
+        [Test]
+        public async Task GetAllApprcvedEditedArticlesAndCategoryAsyncSuccess()
+        {
+            var _context = GetInMemoryDbContext();
+            var _articleRepository = new ArticleRepository(_context);
+            var article1 = new Article
+            {
+                ArticleID = 1,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                 ArticleCategories = new List<ArticleCategory>
+            {
+                new ArticleCategory { CategoryID = 1 }
+            }
+            };
+
+            var article2 = new Article
+            {
+                ArticleID = 2,
+                Title = "Health Economy Update",
+                Content = "Insights and updates on the global economy...",
+                Summary = "A summary of the global economy article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/global-economy",
+                ImgURL = "https://example.com/images/economy.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 8.2m,
+                SaveCount = 150,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                ArticleCategories = new List<ArticleCategory>
+            {
+                new ArticleCategory { CategoryID = 1 }
+            }
+            };
+
+            var article3 = new Article
+            {
+                ArticleID = 3,
+                Title = "Health and Wellness Tips",
+                Content = "Comprehensive guide to maintaining health and wellness...",
+                Summary = "A brief summary of health and wellness tips.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/health-wellness",
+                ImgURL = "https://example.com/images/health.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.0m,
+                SaveCount = 200,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Rejected,
+                ArticleCategories = new List<ArticleCategory>
+            {
+                new ArticleCategory { CategoryID = 2 }
+            }
+            };
+
+
+            await _articleRepository.Add(article1);
+            await _articleRepository.Add(article2);
+            await _articleRepository.Add(article3);
+            var result = await _articleRepository.GetAllApprcvedEditedArticlesAndCategoryAsync(1);
+
+
+            Assert.NotNull(result);
+            Assert.AreEqual(2, result.Count());
+
+
+
+            Assert.ThrowsAsync<ArgumentException>(async () => await _articleRepository.GetAll("Status", "1fds"));
+        }
+
+
+        [Test]
+        public async Task GetAllByStatusAndCategoryAsyncSuccess()
+        {
+            var _context = GetInMemoryDbContext();
+            var _articleRepository = new ArticleRepository(_context);
+            var article1 = new Article
+            {
+                ArticleID = 1,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                ArticleCategories = new List<ArticleCategory>
+            {
+                new ArticleCategory { CategoryID = 1 }
+            }
+            };
+
+            var article2 = new Article
+            {
+                ArticleID = 2,
+                Title = "Health Economy Update",
+                Content = "Insights and updates on the global economy...",
+                Summary = "A summary of the global economy article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/global-economy",
+                ImgURL = "https://example.com/images/economy.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 8.2m,
+                SaveCount = 150,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                ArticleCategories = new List<ArticleCategory>
+            {
+                new ArticleCategory { CategoryID = 1 }
+            }
+            };
+
+            var article3 = new Article
+            {
+                ArticleID = 3,
+                Title = "Health and Wellness Tips",
+                Content = "Comprehensive guide to maintaining health and wellness...",
+                Summary = "A brief summary of health and wellness tips.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/health-wellness",
+                ImgURL = "https://example.com/images/health.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.0m,
+                SaveCount = 200,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Rejected,
+                ArticleCategories = new List<ArticleCategory>
+            {
+                new ArticleCategory { CategoryID = 2 }
+            }
+            };
+
+
+            await _articleRepository.Add(article1);
+            await _articleRepository.Add(article2);
+            await _articleRepository.Add(article3);
+            var result = await _articleRepository.GetAllByStatusAndCategoryAsync(ArticleStatus.Approved,1);
+
+
+            Assert.NotNull(result);
+            Assert.AreEqual(2, result.Count());
+
+
+
+            Assert.ThrowsAsync<ArgumentException>(async () => await _articleRepository.GetAll("Status", "1fds"));
+        }
 
         [Test]
         public async Task Get_AllByColumn_ColumnNotExistException()

@@ -90,9 +90,16 @@ namespace NewsApp.Repositories.Classes
                 var containsExpression = Expression.Call(propertyToLower, containsMethod, constantValue);
                 lambda = Expression.Lambda<Func<Comment, bool>>(containsExpression, parameter);
             }
+            var result = await _dbSet.Include(u => u.User)
+                         .Where(lambda)
+                         .ToListAsync();
 
-            var result = await _dbSet.Include(u=>u.User).Where(lambda).ToListAsync();
+            if (!result.Any())
+            {
 
+                var result1 = await _dbSet.Where(lambda).ToListAsync();
+                return result1;
+            }
             return result;
 
         }

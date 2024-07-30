@@ -4,8 +4,6 @@ using NewsApp.Exceptions;
 using NewsApp.Models;
 using static NewsApp.Models.Enum;
 using System.Linq.Expressions;
-using System.Linq;
-using System.Reflection.Metadata;
 using NewsApp.Repositories.Interfaces;
 
 namespace NewsApp.Repositories.Classes
@@ -117,7 +115,7 @@ namespace NewsApp.Repositories.Classes
         {
             return await _context.Articles
                                .Include(a => a.ArticleCategories)
-                               .Where(a => (a.Status == ArticleStatus.Approved)  &&
+                               .Where(a => (a.Status == ArticleStatus.Approved || a.Status == ArticleStatus.Edited)  &&
                                            a.ArticleCategories.Any(ac => ac.CategoryID == categoryID))
                                .ToListAsync();
         }

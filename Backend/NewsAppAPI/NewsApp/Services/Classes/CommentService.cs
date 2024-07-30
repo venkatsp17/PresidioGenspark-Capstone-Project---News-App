@@ -15,12 +15,14 @@ namespace NewsApp.Services.Classes
         private readonly IHubContext<CommentHub> _hubContext;
         private readonly IRepository<string, Comment, string> _commentRepository;
         private readonly IRepository<string, User, string> _userRepository;
+        private readonly IArticleRepository _articleRepository;
 
-        public CommentService(IHubContext<CommentHub> hubContext, IRepository<string, Comment, string> commentRepository, IRepository<string, User, string> userRepository)
+        public CommentService(IHubContext<CommentHub> hubContext, IRepository<string, Comment, string> commentRepository, IRepository<string, User, string> userRepository, IArticleRepository articleRepository)
         {
             _hubContext = hubContext;
             _commentRepository =commentRepository;
             _userRepository =userRepository;
+            _articleRepository =articleRepository;
         }
 
         public async Task PostComment(CommentDTO comment)
@@ -45,7 +47,9 @@ namespace NewsApp.Services.Classes
             {
                 throw new UnableToAddItemException();
             }
-
+            var article = await _articleRepository.Get("ArticleID", comment.ArticleID.ToString());
+            article.CommentCount +=1;
+            await _articleRepository.Update(article, article.ArticleID.ToString()); 
             // Broadcast to SignalR clients
 
             try
@@ -59,6 +63,9 @@ namespace NewsApp.Services.Classes
                     UserName= user.Name,
                 };
                 await _hubContext.Clients.Group(comment.ArticleID.ToString()).SendAsync("ReceiveComment",commentTOsend);
+
+                await _hubContext.Clients.Group(comment.ArticleID.ToString()).SendAsync("UpdateCommentCount", comment.ArticleID.ToString(), article.CommentCount);
+
                 Console.WriteLine("Comment broadcasted successfully.");
 
             }

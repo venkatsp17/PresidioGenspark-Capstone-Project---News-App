@@ -31,6 +31,8 @@ namespace NewsApp.Models
         [Required]
         public ArticleStatus Status { get; set; }
         public int SaveCount { get; set; }
+        public int ShareCount { get; set; }
+        public int CommentCount { get; set; }
 
         // Navigation properties
         public ICollection<Comment> Comments { get; set; }

@@ -96,20 +96,42 @@ namespace NewsApp.Controllers
         [ProducesResponseType(typeof(AdminArticlePaginatedReturnDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UserPaginatedArticles(int categoryID, int pageno = 1, int pagesize = 10)
+        public async Task<IActionResult> UserPaginatedArticles(int categoryID, int userid, int pageno = 1, int pagesize = 10)
         {
             try
             {
-                var articles = await _articleService.GetPaginatedArticlesForUserAsync(pageno, pagesize, categoryID);    
+                var articles = await _articleService.GetPaginatedArticlesForUserAsync(pageno, pagesize, categoryID, userid);    
                 return Ok(articles);
             }
             catch (UnableToAddItemException ex)
             {
                 return UnprocessableEntity(new ErrorModel(422, ex.Message));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred."));
+                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred. {ex.Message}"));
+            }
+        }
+
+        [Authorize]
+        [HttpPost("articlesharecount")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateShareCount(ShareDataDTO shareDataDTO)
+        {
+            try
+            {
+                await _articleService.UpdateShareCount(shareDataDTO);
+                return Ok("Update Successfull!");
+            }
+            catch (UnableToAddItemException ex)
+            {
+                return UnprocessableEntity(new ErrorModel(422, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred. {ex.Message}"));
             }
         }
 

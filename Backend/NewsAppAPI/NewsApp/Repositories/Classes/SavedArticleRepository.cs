@@ -3,11 +3,12 @@ using NewsApp.Contexts;
 using NewsApp.Exceptions;
 using NewsApp.Models;
 using NewsApp.Repositories.Interfaces;
+using NewsApp.Services.Classes;
 using System.Linq.Expressions;
 
 namespace NewsApp.Repositories.Classes
 {
-    public class SavedArticleRepository : IRepository<string, SavedArticle, string>
+    public class SavedArticleRepository : ISavedRepository
     {
         protected readonly NewsAppDBContext _context;
         private readonly DbSet<SavedArticle> _dbSet;
@@ -53,6 +54,37 @@ namespace NewsApp.Repositories.Classes
             return result;
 
         }
+
+        public async Task<SavedArticle> GetBy2Id(string key1, string value1, string key2, string value2)
+        {
+
+                var constant1 = Expression.Constant(value1);
+                var constant2 = Expression.Constant(value2);
+
+                if (key1.ToLower().Contains("id"))
+                {
+                    constant1 = Expression.Constant(int.Parse(value1));
+                }
+
+                if (key2.ToLower().Contains("id"))
+                {
+                    constant2 = Expression.Constant(int.Parse(value2));
+                }
+
+                var parameter = Expression.Parameter(typeof(SavedArticle), "e");
+                var property1 = Expression.Property(parameter, key1);
+                var property2 = Expression.Property(parameter, key2);
+                var equal1 = Expression.Equal(property1, constant1);
+                var equal2 = Expression.Equal(property2, constant2);
+                var and = Expression.AndAlso(equal1, equal2);
+                var lambda = Expression.Lambda<Func<SavedArticle, bool>>(and, parameter);
+
+                var result = await _dbSet.FirstOrDefaultAsync(lambda);
+
+                return result;
+
+        }
+
 
         public async Task<IEnumerable<SavedArticle>> GetAll(string key, string value)
         {

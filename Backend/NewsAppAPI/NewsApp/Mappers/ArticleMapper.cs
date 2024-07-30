@@ -7,6 +7,7 @@ namespace NewsApp.Mappers
     {
         public static AdminArticleReturnDTO MapAdminArticleReturnDTO(Article article)
         {
+
             return new AdminArticleReturnDTO
             {
                 ArticleID = article.ArticleID,
@@ -20,7 +21,7 @@ namespace NewsApp.Mappers
                 ImpScore = article.ImpScore,
                 Status = article.Status,
                 SaveCount = article.SaveCount,
-
+                CommentCount = article.CommentCount,
             };
         }
     }

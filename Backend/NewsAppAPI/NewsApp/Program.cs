@@ -109,8 +109,9 @@ namespace NewsApp
             builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<IRepository<string, Comment, string>, CommentRepository>();
             builder.Services.AddScoped<IRepository<string, Category, string>, CategoryRepository>();
-            builder.Services.AddScoped<IRepository<string, SavedArticle, string>, SavedArticleRepository>();
+            builder.Services.AddScoped<ISavedRepository, SavedArticleRepository>();
             builder.Services.AddScoped<IArticleCategoryRepository, ArticleCategoryRepository>();
+            builder.Services.AddScoped<IRepository<string,ShareData,string>, ShareDataRepository>();
             #endregion
 
             #region Services
@@ -128,6 +129,7 @@ namespace NewsApp
             //builder.Services.AddHostedService<FetchArticleCategoryService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
+            builder.Services.AddScoped<ISavedArticleService, SavedArticleService>();
 
             #endregion
 

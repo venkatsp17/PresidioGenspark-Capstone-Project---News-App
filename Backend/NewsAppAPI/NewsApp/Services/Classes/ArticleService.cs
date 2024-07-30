@@ -19,6 +19,8 @@ namespace NewsApp.Services.Classes
         private readonly IArticleCategoryRepository _articlecategoryRepository;
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _cache;
+        private readonly ISavedArticleService _savedArticleService;
+        private readonly IRepository<string, ShareData, string> _shareDataRepository;
 
         private const string MinNewsIdCacheKey = "MinNewsId";
 
@@ -26,7 +28,9 @@ namespace NewsApp.Services.Classes
             HttpClient httpClient, 
             IRepository<string, Category, string> categoryRepository, 
             IArticleCategoryRepository articlecategoryRepository,
-             IMemoryCache cache
+             IMemoryCache cache,
+             ISavedArticleService savedArticleService,
+             IRepository<string, ShareData, string> shareDataRepository
             )
         {
             _articleRepository = articleRepository;
@@ -35,6 +39,8 @@ namespace NewsApp.Services.Classes
             _httpClient.BaseAddress = new Uri("https://m.inshorts.com/en/read");
             _articlecategoryRepository = articlecategoryRepository;
             _cache = cache;
+            _savedArticleService = savedArticleService;
+            _shareDataRepository = shareDataRepository;
         }
 
         public async Task<AdminArticleReturnDTO> ChangeArticleStatus(string articleId, ArticleStatus articleStatus)
@@ -423,7 +429,7 @@ namespace NewsApp.Services.Classes
             };
         }
 
-        public async Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesForUserAsync(int pageNumber, int pageSize, int categoryID)
+        public async Task<AdminArticlePaginatedReturnDTO> GetPaginatedArticlesForUserAsync(int pageNumber, int pageSize, int categoryID, int userid)
         {
 
             var allArticles = await _articleRepository.GetAllApprcvedEditedArticlesAndCategoryAsync(categoryID);
@@ -444,9 +450,21 @@ namespace NewsApp.Services.Classes
 
             var totalPages = (int)Math.Ceiling(allArticles.Count() / (double)pageSize);
 
+            var articlesList = new List<AdminArticleReturnDTO>();
+
+            foreach (var article in paginatedArticles)
+            {
+                var result = ArticleMapper.MapAdminArticleReturnDTO(article);
+                if (userid != 0)
+                {
+                    result.isSaved = await _savedArticleService.CheckForSaved(article.ArticleID, userid);
+                }
+                articlesList.Add(result);
+            }
+
             return new AdminArticlePaginatedReturnDTO
             {
-                Articles = paginatedArticles.Select(x => ArticleMapper.MapAdminArticleReturnDTO(x)),
+                Articles = articlesList,
                 totalpages = totalPages
             };
         }
@@ -476,7 +494,41 @@ namespace NewsApp.Services.Classes
             throw new UnableToUpdateItemException();
         }
 
+        public async Task<ShareDataReturnDTO> UpdateShareCount(ShareDataDTO shareDataDTO)
+        {
 
+            var newshareData = new ShareData() { 
+                ArticleID = shareDataDTO.ArticleID,
+                UserID = shareDataDTO.UserID,
+                Platform = shareDataDTO.Platform,
+            };
 
+            var result = await _shareDataRepository.Add(newshareData);
+
+            if(result == null)
+            {
+                throw new UnableToAddItemException();
+            }
+
+            var article = await _articleRepository.Get("ArticleID", shareDataDTO.ArticleID.ToString());
+
+            article.ShareCount++;
+
+            var updateRes = await _articleRepository.Update(article, article.ArticleID.ToString());
+            if(updateRes == null)
+            {
+                throw new UnableToUpdateItemException();
+            }
+
+            var returnDTO = new ShareDataReturnDTO()
+            {
+                ArticleID = result.ArticleID,
+                UserID = result.UserID,
+                Platform = result.Platform,
+                Id = result.Id,
+            };
+
+            return returnDTO;
+        }
     }
 }

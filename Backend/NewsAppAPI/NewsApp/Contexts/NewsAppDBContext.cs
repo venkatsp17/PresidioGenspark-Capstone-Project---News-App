@@ -16,6 +16,7 @@ namespace NewsApp.Contexts
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ArticleCategory> ArticleCategories { get; set; }
+        public DbSet<ShareData> ShareDatas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
