@@ -130,6 +130,16 @@ namespace NewsApp.Repositories.Classes
                                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Article>> GetArticlesForRanking(int categoryID)
+        {
+            DateTime sevenDaysAgo = DateTime.Now.AddDays(-7);
+            return await _context.Articles
+                               .Include(a => a.ArticleCategories)
+                               .Where(a => (a.Status == ArticleStatus.Approved || a.Status == ArticleStatus.Edited)  &&
+                                           a.ArticleCategories.Any(ac => ac.CategoryID == categoryID))
+                               .ToListAsync();
+        }
+
         public async Task<Article> Update(Article item, string key)
         {
             var entity = await _dbSet.FindAsync(int.Parse(key));

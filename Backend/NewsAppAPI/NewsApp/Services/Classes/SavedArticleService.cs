@@ -29,13 +29,13 @@ namespace NewsApp.Services.Classes
             try
             {
                 var article = await _savedArticleRepository.GetBy2Id("ArticleID", articleid.ToString(), "UserID", userid.ToString());
-                return article != null;
+                return await Task.FromResult(article != null);
             }
             catch (Exception ex)
             {
                 // Log the exception for debugging
                 _logger.LogError($"Error in CheckForSaved: {ex.Message}", ex);
-                return false;
+                return await Task.FromResult(false);
             }
         }
 

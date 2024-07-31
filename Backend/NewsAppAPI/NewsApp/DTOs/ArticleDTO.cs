@@ -24,6 +24,8 @@ namespace NewsApp.DTOs
 
         public int CommentCount { get; set; }
 
+        public int ShareCount { get; set; }
+
     }
 
 

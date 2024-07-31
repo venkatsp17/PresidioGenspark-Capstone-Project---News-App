@@ -8,12 +8,14 @@ using static NewsApp.Models.Enum;
 using NewsApp.DTOs;
 using NewsApp.Mappers;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.SignalR;
 
 
 namespace NewsApp.Services.Classes
 {
     public class ArticleService : IArticleService
     {
+        private readonly IHubContext<CommentHub> _hubContext;
         private readonly IArticleRepository _articleRepository;
         private readonly IRepository<string, Category, string> _categoryRepository;
         private readonly IArticleCategoryRepository _articlecategoryRepository;
@@ -25,7 +27,8 @@ namespace NewsApp.Services.Classes
         private const string MinNewsIdCacheKey = "MinNewsId";
 
         public ArticleService(IArticleRepository articleRepository, 
-            HttpClient httpClient, 
+            HttpClient httpClient,
+            IHubContext<CommentHub> hubContext,
             IRepository<string, Category, string> categoryRepository, 
             IArticleCategoryRepository articlecategoryRepository,
              IMemoryCache cache,
@@ -41,6 +44,7 @@ namespace NewsApp.Services.Classes
             _cache = cache;
             _savedArticleService = savedArticleService;
             _shareDataRepository = shareDataRepository;
+            _hubContext = hubContext;
         }
 
         public async Task<AdminArticleReturnDTO> ChangeArticleStatus(string articleId, ArticleStatus articleStatus)
@@ -234,9 +238,11 @@ namespace NewsApp.Services.Classes
 
         public async Task FetchAndSaveCategoryArticlesAsync()
         {
-            var categories = await _categoryRepository.GetAll("",""); 
+            var categories = await _categoryRepository.GetAll("", "");
 
-            foreach (var category in categories)
+            var adminCategories = categories.Where(category => category.Type != "ADMIN_CATEGORY");
+
+            foreach (var category in adminCategories)
             {
                 var pageNumber = _cache.TryGetValue($"CategoryPage_{category.CategoryID}", out int cachedPageNumber) ? cachedPageNumber : 1;
                 await FetchAndSaveArticlesByCategoryAsync(category, pageNumber);
@@ -527,6 +533,8 @@ namespace NewsApp.Services.Classes
                 Platform = result.Platform,
                 Id = result.Id,
             };
+
+            await _hubContext.Clients.Group(article.ArticleID.ToString()).SendAsync("UpdateShareCount", article.ArticleID.ToString(), article.ShareCount);
 
             return returnDTO;
         }

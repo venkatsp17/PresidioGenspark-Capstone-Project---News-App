@@ -25,5 +25,45 @@ namespace NewsApp.Services.Classes
 
             return categories.Select(c => new CategoryDTO { Id=c.CategoryID, Name=c.Name,Description=c.Description });
         }
+
+        public async Task<CategoryDTO> AddCategory(CategoryGetDTO categoryGetDTO)
+        {
+            var newCategory = new Category()
+            {
+                Description = categoryGetDTO.Description,
+                Name = categoryGetDTO.Name,
+                Type = "ADMIN_CATEGORY"
+            };
+            var category = await _categoryRepository.Add(newCategory);
+
+            if (category.CategoryID == null)
+            {
+                throw new UnableToAddItemException();
+            }
+
+            return new CategoryDTO()
+            {
+                Id = category.CategoryID,
+                Description= category.Description,
+                Name = category.Name,
+            };
+        }
+
+        public async Task<CategoryDTO> DeleteCategory(int categoryid)
+        {
+            var category = await _categoryRepository.Delete(categoryid.ToString());
+
+            if (category.CategoryID == null)
+            {
+                throw new ItemNotFoundException();
+            }
+
+            return new CategoryDTO()
+            {
+                Id = category.CategoryID,
+                Description = category.Description,
+                Name = category.Name,
+            };
+        }
     }
 }

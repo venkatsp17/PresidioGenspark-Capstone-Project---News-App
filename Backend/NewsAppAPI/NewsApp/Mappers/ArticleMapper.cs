@@ -22,6 +22,7 @@ namespace NewsApp.Mappers
                 Status = article.Status,
                 SaveCount = article.SaveCount,
                 CommentCount = article.CommentCount,
+                ShareCount = article.ShareCount,
             };
         }
     }

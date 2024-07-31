@@ -14,10 +14,12 @@ namespace NewsApp.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly IArticleService _articleService;
+        private readonly IRankArticleService _rankarticleService;
 
-        public ArticleController(IArticleService articleService)
+        public ArticleController(IArticleService articleService, IRankArticleService rankarticleService)
         {
             _articleService = articleService;
+            _rankarticleService = rankarticleService;
         }
 
 
@@ -124,6 +126,28 @@ namespace NewsApp.Controllers
             {
                 await _articleService.UpdateShareCount(shareDataDTO);
                 return Ok("Update Successfull!");
+            }
+            catch (UnableToAddItemException ex)
+            {
+                return UnprocessableEntity(new ErrorModel(422, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred. {ex.Message}"));
+            }
+        }
+
+        [Authorize]
+        [HttpGet("rankedarticles")]
+        [ProducesResponseType(typeof(IEnumerable<AdminArticleReturnDTO>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RankArticles(int categoryid, int userid)
+        {
+            try
+            {
+                var articles = await _rankarticleService.RankTop3Articles(categoryid, userid);
+                return Ok(articles);
             }
             catch (UnableToAddItemException ex)
             {

@@ -130,6 +130,8 @@ namespace NewsApp
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<ISavedArticleService, SavedArticleService>();
+            builder.Services.AddScoped<IRankArticleService, RankArticleService>();
+
 
             #endregion
 
