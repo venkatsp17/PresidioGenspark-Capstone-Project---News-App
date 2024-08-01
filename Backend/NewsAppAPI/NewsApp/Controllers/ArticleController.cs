@@ -72,7 +72,7 @@ namespace NewsApp.Controllers
         [ProducesResponseType(typeof(AdminArticleReturnDTO), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> EditArticleDetails(AdminArticleReturnDTO adminArticleReturnDTO)
+        public async Task<IActionResult> EditArticleDetails(AdminArticleEditGetDTO adminArticleReturnDTO)
         {
             try
             {
@@ -103,6 +103,27 @@ namespace NewsApp.Controllers
             try
             {
                 var articles = await _articleService.GetPaginatedArticlesForUserAsync(pageno, pagesize, categoryID, userid);    
+                return Ok(articles);
+            }
+            catch (UnableToAddItemException ex)
+            {
+                return UnprocessableEntity(new ErrorModel(422, ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ErrorModel(500, $"An unexpected error occurred. {ex.Message}"));
+            }
+        }
+
+        [HttpGet("userfeeds")]
+        [ProducesResponseType(typeof(AdminArticlePaginatedReturnDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UserFeeds(int userid, int pageno = 1, int pagesize = 10)
+        {
+            try
+            {
+                var articles = await _articleService.GetPaginatedFeedsForUserAsync(pageno, pagesize,  userid);
                 return Ok(articles);
             }
             catch (UnableToAddItemException ex)

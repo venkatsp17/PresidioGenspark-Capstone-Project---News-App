@@ -13,5 +13,7 @@ namespace NewsApp.Repositories.Interfaces
 
         Task<IEnumerable<Article>> GetArticlesForRanking(int categoryID);
 
+        Task<IEnumerable<Article>> GetAllApprcvedEditedArticlesAsync();
+
     }
 }

@@ -15,5 +15,11 @@
             Approved, 
             Rejected
         }
+
+        public enum Preference
+        {
+            Like,
+            DisLike
+        }
     }
 }

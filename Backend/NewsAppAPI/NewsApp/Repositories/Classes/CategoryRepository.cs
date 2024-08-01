@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace NewsApp.Repositories.Classes
 {
-    public class CategoryRepository : IRepository<string, Category, string>
+    public class CategoryRepository : ICategoryRepository
     {
         protected readonly NewsAppDBContext _context;
         private readonly DbSet<Category> _dbSet;
@@ -102,6 +102,16 @@ namespace NewsApp.Repositories.Classes
             }
             return item;
         }
+
+        public async Task<IEnumerable<Category>> GetCategoriesByArticleIdAsync(int articleId)
+        {
+            var categories = await _context.Categories
+                .Where(c => c.ArticleCategories.Any(ac => ac.ArticleID == articleId))
+                .ToListAsync();
+
+            return categories;
+        }
+
     }
 }
 

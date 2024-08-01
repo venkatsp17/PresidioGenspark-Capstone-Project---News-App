@@ -108,10 +108,11 @@ namespace NewsApp
             builder.Services.AddScoped<IRepository<string, User, string>, UserRepository>();
             builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<IRepository<string, Comment, string>, CommentRepository>();
-            builder.Services.AddScoped<IRepository<string, Category, string>, CategoryRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ISavedRepository, SavedArticleRepository>();
             builder.Services.AddScoped<IArticleCategoryRepository, ArticleCategoryRepository>();
             builder.Services.AddScoped<IRepository<string,ShareData,string>, ShareDataRepository>();
+            builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
             #endregion
 
             #region Services
@@ -131,6 +132,7 @@ namespace NewsApp
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<ISavedArticleService, SavedArticleService>();
             builder.Services.AddScoped<IRankArticleService, RankArticleService>();
+            builder.Services.AddScoped<IUserPreferenceService, UserPreferenceService>();
 
 
             #endregion

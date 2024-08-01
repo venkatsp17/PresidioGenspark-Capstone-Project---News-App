@@ -28,6 +28,31 @@ namespace NewsApp.DTOs
 
     }
 
+    public class AdminArticleEditGetDTO
+    {
+
+        public int ArticleID { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public string Summary { get; set; }
+        public DateTime AddedAt { get; set; }
+        public string OriginURL { get; set; }
+        public string ImgURL { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public decimal ImpScore { get; set; }
+        public ArticleStatus Status { get; set; }
+        public int SaveCount { get; set; }
+
+        public bool isSaved { get; set; }
+
+        public int CommentCount { get; set; }
+
+        public int ShareCount { get; set; }
+
+        public List<int> Categories { get; set; }
+
+    }
+
 
     public class AdminArticlePaginatedReturnDTO
     {

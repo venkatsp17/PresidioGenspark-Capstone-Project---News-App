@@ -25,5 +25,7 @@ namespace NewsApp.Models
         // Navigation properties
         public ICollection<Comment> Comments { get; set; }
         public ICollection<SavedArticle> SavedArticles { get; set; }
+
+        public ICollection<UserPreference> UserPreferences { get; set; }
     }
 }

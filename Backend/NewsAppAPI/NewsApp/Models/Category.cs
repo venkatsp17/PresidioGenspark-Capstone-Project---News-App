@@ -16,5 +16,6 @@ namespace NewsApp.Models
 
         // Navigation properties
         public ICollection<ArticleCategory> ArticleCategories { get; set; }
+        public ICollection<UserPreference> UserPreferences { get; set; }
     }
 }

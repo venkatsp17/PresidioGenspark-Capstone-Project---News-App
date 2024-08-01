@@ -9,5 +9,7 @@ namespace NewsApp.Services.Interfaces
         Task<CategoryDTO> AddCategory(CategoryGetDTO categoryGetDTO);
 
         Task<CategoryDTO> DeleteCategory(int categoryid);
+
+        Task<IEnumerable<CategoryAdminDTO>> GetAllAdminCategories(int articleid);
     }
 }

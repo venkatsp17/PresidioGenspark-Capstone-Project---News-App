@@ -120,6 +120,14 @@ namespace NewsApp.Repositories.Classes
                                .ToListAsync();
         }
 
+        public async Task<IEnumerable<Article>> GetAllApprcvedEditedArticlesAsync()
+        {
+            return await _context.Articles
+                               .Include(a => a.ArticleCategories)
+                               .Where(a => (a.Status == ArticleStatus.Approved || a.Status == ArticleStatus.Edited))          
+                               .ToListAsync();
+        }
+
 
         public async Task<IEnumerable<Article>> GetAllByStatusAndCategoryAsync(ArticleStatus status, int categoryID)
         {

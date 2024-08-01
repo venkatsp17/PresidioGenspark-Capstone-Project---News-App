@@ -8,10 +8,11 @@ namespace NewsApp.Services.Classes
 {
     public class CategoryService : ICategoryService
     {
-        private readonly IRepository<string, Category, string> _categoryRepository;
-        public CategoryService(IRepository<string, Category, string> categoryRepository)
+        private readonly ICategoryRepository _categoryRepository;
+        public CategoryService(ICategoryRepository categoryRepository)
         {
             _categoryRepository = categoryRepository;
+
         }
 
         public async Task<IEnumerable<CategoryDTO>> GetAllCategories()
@@ -23,11 +24,17 @@ namespace NewsApp.Services.Classes
                 throw new NoAvailableItemException();
             }
 
-            return categories.Select(c => new CategoryDTO { Id=c.CategoryID, Name=c.Name,Description=c.Description });
+            return categories.Select(c => new CategoryDTO { Id=c.CategoryID, Name=c.Name,Description=c.Description, Type=c.Type });
         }
 
         public async Task<CategoryDTO> AddCategory(CategoryGetDTO categoryGetDTO)
         {
+            var existingCategory = await _categoryRepository.Get("Name",categoryGetDTO.Name);
+            if (existingCategory != null)
+            {
+                throw new ItemAlreadyExistException();
+            }
+
             var newCategory = new Category()
             {
                 Description = categoryGetDTO.Description,
@@ -65,5 +72,28 @@ namespace NewsApp.Services.Classes
                 Name = category.Name,
             };
         }
+
+        public async Task<IEnumerable<CategoryAdminDTO>> GetAllAdminCategories(int articleid)
+        {
+            IEnumerable<Category> categories;
+            if (articleid == 0)
+            {
+                categories = await _categoryRepository.GetAll("", "");
+               
+            }
+            else
+            {
+                categories = await _categoryRepository.GetCategoriesByArticleIdAsync(articleid);
+            }
+
+            if (categories == null || categories.Count() == 0)
+            {
+                throw new NoAvailableItemException();
+            }
+
+            return categories.Select(c => new CategoryAdminDTO { Id = c.CategoryID, Name = c.Name, Description = c.Description, Type = c.Type });
+
+        }
+
     }
 }

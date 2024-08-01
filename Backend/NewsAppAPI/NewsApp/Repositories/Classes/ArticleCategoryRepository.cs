@@ -26,6 +26,7 @@ namespace NewsApp.Repositories.Classes
             return item;
         }
 
+
         public async Task<ArticleCategory> Delete(string key)
         {
             // Check if the key contains a hyphen, indicating a composite key
@@ -49,6 +50,45 @@ namespace NewsApp.Repositories.Classes
                 return entity;
             }
             throw new ArgumentException("The key must be provided in the format 'ArticleID-CategoryID'.");
+        }
+
+        public async Task<ArticleCategory> Get(string key, string value)
+        {
+            // Check if the key contains a hyphen, indicating a composite key
+            if (value.Contains('-'))
+            {
+                var keys = value.Split('-');
+                if (keys.Length != 2)
+                {
+                    throw new ArgumentException("The key must be provided in the format 'ArticleID-CategoryID'.");
+                }
+
+                int articleId = int.Parse(keys[0]);
+                int categoryId = int.Parse(keys[1]);
+
+                var entity = await _dbSet.FindAsync(articleId, categoryId);
+                if (entity != null)
+                {
+                   return entity;
+                }
+                return null;
+            }
+            else
+            {
+                var constant = Expression.Constant(value);
+                if (key.ToLower().Contains("id"))
+                {
+                    constant = Expression.Constant(int.Parse(value));
+                }
+                var parameter = Expression.Parameter(typeof(ArticleCategory), "e");
+                var property = Expression.Property(parameter, key);
+                var equal = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<ArticleCategory, bool>>(equal, parameter);
+
+                var result = await _dbSet.FirstOrDefaultAsync(lambda);
+                return result;
+            }
+           
         }
 
         public async Task<IEnumerable<ArticleCategory>> DeleteByArticleID(string key)
@@ -79,21 +119,7 @@ namespace NewsApp.Repositories.Classes
             return entities;
         }
 
-        public async Task<ArticleCategory> Get(string key, string value)
-        {
-            var constant = Expression.Constant(value);
-            if (key.ToLower().Contains("id"))
-            {
-                constant = Expression.Constant(int.Parse(value));
-            }
-            var parameter = Expression.Parameter(typeof(ArticleCategory), "e");
-            var property = Expression.Property(parameter, key);
-            var equal = Expression.Equal(property, constant);
-            var lambda = Expression.Lambda<Func<ArticleCategory, bool>>(equal, parameter);
-
-            var result = await _dbSet.FirstOrDefaultAsync(lambda);
-            return result;
-        }
+      
 
         public async Task<IEnumerable<ArticleCategory>> GetAll(string key, string value)
         {

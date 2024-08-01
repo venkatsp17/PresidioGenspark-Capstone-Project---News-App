@@ -17,6 +17,7 @@ namespace NewsApp.Contexts
         public DbSet<Category> Categories { get; set; }
         public DbSet<ArticleCategory> ArticleCategories { get; set; }
         public DbSet<ShareData> ShareDatas { get; set; }
+        public DbSet<UserPreference> UserPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,16 +49,26 @@ namespace NewsApp.Contexts
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SavedArticle>()
-                .HasOne(sa => sa.Article)
-                .WithOne()
-                .HasForeignKey<SavedArticle>(sa => sa.ArticleID)
-                .OnDelete(DeleteBehavior.Restrict);
+                 .HasOne(sa => sa.Article)
+                 .WithMany(a => a.SavedArticles) 
+                 .HasForeignKey(sa => sa.ArticleID)
+                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.ArticleCategories)
                 .WithOne(ac => ac.Category)
                 .HasForeignKey(ac => ac.CategoryID)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserPreference>()
+                .HasOne(up => up.User)
+                .WithMany(u => u.UserPreferences)
+                .HasForeignKey(up => up.UserID);
+
+            modelBuilder.Entity<UserPreference>()
+                .HasOne(up => up.Category)
+                .WithMany(c => c.UserPreferences)
+                .HasForeignKey(up => up.CategoryID);
 
         }
     }

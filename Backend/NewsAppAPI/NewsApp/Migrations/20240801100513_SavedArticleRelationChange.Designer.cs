@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsApp.Contexts;
 
@@ -11,9 +12,10 @@ using NewsApp.Contexts;
 namespace NewsApp.Migrations
 {
     [DbContext(typeof(NewsAppDBContext))]
-    partial class NewsAppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240801100513_SavedArticleRelationChange")]
+    partial class SavedArticleRelationChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,32 +247,6 @@ namespace NewsApp.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NewsApp.Models.UserPreference", b =>
-                {
-                    b.Property<int>("UserPreferenceID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserPreferenceID"), 1L, 1);
-
-                    b.Property<int>("CategoryID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("preference")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserPreferenceID");
-
-                    b.HasIndex("CategoryID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("UserPreferences");
-                });
-
             modelBuilder.Entity("NewsApp.Models.ArticleCategory", b =>
                 {
                     b.HasOne("NewsApp.Models.Article", "Article")
@@ -328,25 +304,6 @@ namespace NewsApp.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("NewsApp.Models.UserPreference", b =>
-                {
-                    b.HasOne("NewsApp.Models.Category", "Category")
-                        .WithMany("UserPreferences")
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NewsApp.Models.User", "User")
-                        .WithMany("UserPreferences")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("NewsApp.Models.Article", b =>
                 {
                     b.Navigation("ArticleCategories");
@@ -359,8 +316,6 @@ namespace NewsApp.Migrations
             modelBuilder.Entity("NewsApp.Models.Category", b =>
                 {
                     b.Navigation("ArticleCategories");
-
-                    b.Navigation("UserPreferences");
                 });
 
             modelBuilder.Entity("NewsApp.Models.User", b =>
@@ -368,8 +323,6 @@ namespace NewsApp.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("SavedArticles");
-
-                    b.Navigation("UserPreferences");
                 });
 #pragma warning restore 612, 618
         }

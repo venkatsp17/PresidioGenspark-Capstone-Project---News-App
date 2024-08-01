@@ -9,6 +9,7 @@ using NewsApp.DTOs;
 using NewsApp.Mappers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.SignalR;
+using NewsApp.Repositories.Classes;
 
 
 namespace NewsApp.Services.Classes
@@ -17,7 +18,8 @@ namespace NewsApp.Services.Classes
     {
         private readonly IHubContext<CommentHub> _hubContext;
         private readonly IArticleRepository _articleRepository;
-        private readonly IRepository<string, Category, string> _categoryRepository;
+        private readonly IUserPreferenceRepository _userPreferenceRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IArticleCategoryRepository _articlecategoryRepository;
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _cache;
@@ -29,7 +31,8 @@ namespace NewsApp.Services.Classes
         public ArticleService(IArticleRepository articleRepository, 
             HttpClient httpClient,
             IHubContext<CommentHub> hubContext,
-            IRepository<string, Category, string> categoryRepository, 
+            IUserPreferenceRepository userPreferenceRepository,
+            ICategoryRepository categoryRepository, 
             IArticleCategoryRepository articlecategoryRepository,
              IMemoryCache cache,
              ISavedArticleService savedArticleService,
@@ -45,6 +48,7 @@ namespace NewsApp.Services.Classes
             _savedArticleService = savedArticleService;
             _shareDataRepository = shareDataRepository;
             _hubContext = hubContext;
+            _userPreferenceRepository = userPreferenceRepository;
         }
 
         public async Task<AdminArticleReturnDTO> ChangeArticleStatus(string articleId, ArticleStatus articleStatus)
@@ -475,8 +479,85 @@ namespace NewsApp.Services.Classes
             };
         }
 
+        public async Task<AdminArticlePaginatedReturnDTO> GetPaginatedFeedsForUserAsync(int pageNumber, int pageSize, int userid)
+        {
+            var userPreferences = await _userPreferenceRepository.GetAll("UserID", userid.ToString());
 
-        public async Task<AdminArticleReturnDTO> EditArticleData(AdminArticleReturnDTO adminArticleReturnDTO)
+
+            var likedCategories = new List<int>();
+            var dislikedCategories = new List<int>();
+
+      
+            if (userPreferences != null && userPreferences.Any())
+            {
+                likedCategories = userPreferences
+                    .Where(p => p.preference == Preference.Like)
+                    .Select(p => p.CategoryID)
+                    .ToList();
+
+                dislikedCategories = userPreferences
+                    .Where(p => p.preference == Preference.DisLike)
+                    .Select(p => p.CategoryID)
+                    .ToList();
+            }
+
+
+            var allArticles = await _articleRepository.GetAllApprcvedEditedArticlesAsync(); 
+
+            if (allArticles == null || !allArticles.Any())
+            {
+                throw new NoAvailableItemException();
+            }
+
+            IEnumerable<Article> filteredArticles;
+
+            if (likedCategories.Any() || dislikedCategories.Any())
+            {
+   
+                filteredArticles = allArticles
+                    .Where(article => article.ArticleCategories
+                    .Any(ac => likedCategories.Contains(ac.CategoryID)) &&
+                    !article.ArticleCategories
+                    .Any(ac => dislikedCategories.Contains(ac.CategoryID)));
+            }
+            else
+            {
+                filteredArticles = allArticles.AsQueryable();
+            }
+
+
+            filteredArticles = filteredArticles
+                .OrderByDescending(article => article.CreatedAt);
+
+            int skip = (pageNumber - 1) * pageSize;
+
+            var paginatedArticles = filteredArticles
+                .Skip(skip)
+                .Take(pageSize);
+
+            var totalPages = (int)Math.Ceiling(filteredArticles.Count() / (double)pageSize);
+
+            var articlesList = new List<AdminArticleReturnDTO>();
+
+            foreach (var article in paginatedArticles)
+            {
+                var result = ArticleMapper.MapAdminArticleReturnDTO(article);
+                if (userid != 0)
+                {
+                    result.isSaved = await _savedArticleService.CheckForSaved(article.ArticleID, userid);
+                }
+                articlesList.Add(result);
+            }
+
+            return new AdminArticlePaginatedReturnDTO
+            {
+                Articles = articlesList,
+                totalpages = totalPages
+            };
+        }
+
+
+        public async Task<AdminArticleReturnDTO> EditArticleData(AdminArticleEditGetDTO adminArticleReturnDTO)
         {
             var article = await _articleRepository.Get("ArticleID", adminArticleReturnDTO.ArticleID.ToString());
 
@@ -494,6 +575,26 @@ namespace NewsApp.Services.Classes
 
             var result = await _articleRepository.Update(article, article.ArticleID.ToString());
             if(result != null) { 
+                await _articlecategoryRepository.DeleteByArticleID(article.ArticleID.ToString());
+                foreach(var categorid in adminArticleReturnDTO.Categories)
+                {
+                    var existingarticlecategory = await _articlecategoryRepository.Get("", article.ArticleID.ToString() + "-" + categorid.ToString());
+                    if(existingarticlecategory == null)
+                    {
+                        var newArticleCategory = new ArticleCategory()
+                        {
+                            ArticleID = article.ArticleID,
+                            CategoryID = categorid,
+                        };
+                        var articleCategory = await _articlecategoryRepository.Add(newArticleCategory);
+
+                        if (articleCategory.ArticleID == null)
+                        {
+                            throw new UnableToUpdateItemException();
+                        }
+                    }
+                   
+                }
                 return ArticleMapper.MapAdminArticleReturnDTO(result);
             }
 
