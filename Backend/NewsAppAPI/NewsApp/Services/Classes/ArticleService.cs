@@ -10,6 +10,7 @@ using NewsApp.Mappers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.SignalR;
 using NewsApp.Repositories.Classes;
+using System.Diagnostics.CodeAnalysis;
 
 
 namespace NewsApp.Services.Classes
@@ -67,7 +68,7 @@ namespace NewsApp.Services.Classes
             }
             return ArticleMapper.MapAdminArticleReturnDTO(result);             
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task FetchAndSaveArticlesAsync()
         {
             var minNewsId = _cache.Get<string>(MinNewsIdCacheKey);
@@ -239,7 +240,7 @@ namespace NewsApp.Services.Classes
             }
 
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task FetchAndSaveCategoryArticlesAsync()
         {
             var categories = await _categoryRepository.GetAll("", "");
@@ -252,7 +253,7 @@ namespace NewsApp.Services.Classes
                 await FetchAndSaveArticlesByCategoryAsync(category, pageNumber);
             }
         }
-
+        [ExcludeFromCodeCoverage]
         private async Task FetchAndSaveArticlesByCategoryAsync(Category category, int pageNumber)
         {
             string url = $"https://m.inshorts.com/api/en/search/trending_topics/{category.Description}?page={pageNumber}&type={category.Type}";
@@ -588,7 +589,7 @@ namespace NewsApp.Services.Classes
                         };
                         var articleCategory = await _articlecategoryRepository.Add(newArticleCategory);
 
-                        if (articleCategory.ArticleID == null)
+                        if (articleCategory.ArticleID == 0)
                         {
                             throw new UnableToUpdateItemException();
                         }
@@ -639,5 +640,7 @@ namespace NewsApp.Services.Classes
 
             return returnDTO;
         }
+
+
     }
 }

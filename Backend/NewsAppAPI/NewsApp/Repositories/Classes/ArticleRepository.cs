@@ -5,6 +5,7 @@ using NewsApp.Models;
 using static NewsApp.Models.Enum;
 using System.Linq.Expressions;
 using NewsApp.Repositories.Interfaces;
+using NewsApp.DTOs;
 
 namespace NewsApp.Repositories.Classes
 {
@@ -128,6 +129,10 @@ namespace NewsApp.Repositories.Classes
                                .ToListAsync();
         }
 
+        public async Task<int> GetAllArticleCountByStatus(ArticleStatus articleStatus)
+        {
+           return await _dbSet.CountAsync(x=> x.Status == articleStatus);
+        }
 
         public async Task<IEnumerable<Article>> GetAllByStatusAndCategoryAsync(ArticleStatus status, int categoryID)
         {
@@ -148,6 +153,61 @@ namespace NewsApp.Repositories.Classes
                                .ToListAsync();
         }
 
+        public async Task<ArticleDto> MostInteractedArticle(string type)
+        {
+            if (type == "comment")
+            {
+               var mostCommentedArticle = await _context.Articles
+              .OrderByDescending(a => a.CommentCount)
+              .Select(a => new ArticleDto
+              {
+                  Id = a.ArticleID,
+                  Title = a.Title,
+                  Categories = a.ArticleCategories.Select(ac => ac.Category.Name).ToList(),
+                  CommentCount = a.CommentCount,
+                  SaveCount = a.SaveCount,
+                  ShareCount = a.ShareCount
+              })
+              .FirstOrDefaultAsync();
+                return mostCommentedArticle;
+            }
+
+            if(type == "saved")
+            {
+               var mostSavedArticle = await _context.Articles
+              .OrderByDescending(a => a.SaveCount)
+              .Select(a => new ArticleDto
+              {
+                  Id = a.ArticleID,
+                  Title = a.Title,
+                  Categories = a.ArticleCategories.Select(ac => ac.Category.Name).ToList(),
+                  CommentCount = a.CommentCount,
+                  SaveCount = a.SaveCount,
+                  ShareCount = a.ShareCount
+              })
+              .FirstOrDefaultAsync();
+                return mostSavedArticle;
+            }
+
+            if(type == "shared")
+            {
+                var mostSharedArticle = await _context.Articles
+                .OrderByDescending(a => a.ShareCount)
+                .Select(a => new ArticleDto
+                {
+                    Id = a.ArticleID,
+                    Title = a.Title,
+                    Categories = a.ArticleCategories.Select(ac => ac.Category.Name).ToList(),
+                    CommentCount = a.CommentCount,
+                    SaveCount = a.SaveCount,
+                    ShareCount = a.ShareCount
+                })
+                .FirstOrDefaultAsync();
+                return mostSharedArticle;
+            }
+            return new ArticleDto() { };
+        }
+
         public async Task<Article> Update(Article item, string key)
         {
             var entity = await _dbSet.FindAsync(int.Parse(key));
@@ -158,7 +218,5 @@ namespace NewsApp.Repositories.Classes
             }
             return item;
         }
-
-
     }
 }

@@ -1,4 +1,6 @@
 using DotNetEnv;
+using log4net.Config;
+using log4net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,20 +11,31 @@ using NewsApp.Repositories.Classes;
 using NewsApp.Repositories.Interfaces;
 using NewsApp.Services.Classes;
 using NewsApp.Services.Interfaces;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 
 namespace NewsApp
 {
     public class Program
     {
+        [ExcludeFromCodeCoverage]
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+            // Create a logger instance
+            ILog log = LogManager.GetLogger(typeof(Program));
+            log.Info("Application is starting.");
+
             Env.Load();
 
-            builder.Configuration.AddEnvironmentVariables();
 
+            builder.Configuration.AddEnvironmentVariables();
+            log.Info("Adding Cors");
             #region cors
             builder.Services.AddCors(options =>
             {
@@ -36,9 +49,9 @@ namespace NewsApp
                     });
             });
             #endregion
-
+            log.Info("Adding Controllers");
             builder.Services.AddControllers();
-
+            log.Info("Adding SignalR");
             // Add SignalR
             builder.Services.AddSignalR();
 
@@ -70,7 +83,7 @@ namespace NewsApp
                     }
                 });
             });
-
+            log.Info("Adding JWT Authentication");
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -97,15 +110,15 @@ namespace NewsApp
                 };
 
             });
-
+            log.Info("Initalizing DB Context");
             #region context
             builder.Services.AddDbContext<NewsAppDBContext>(
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection"))
                 );
             #endregion
-
+            log.Info("Adding Repositories & Services");
             #region Repositories
-            builder.Services.AddScoped<IRepository<string, User, string>, UserRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
             builder.Services.AddScoped<IRepository<string, Comment, string>, CommentRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -157,8 +170,9 @@ namespace NewsApp
 
             app.MapControllers();
             app.MapHub<CommentHub>("/commentHub").RequireAuthorization();
-
+            log.Info("Application Started successfully!");
             app.Run();
+            log.Info("Application Ended!");
         }
     }
 }

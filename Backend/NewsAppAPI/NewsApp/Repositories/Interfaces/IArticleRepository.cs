@@ -1,4 +1,5 @@
-﻿using NewsApp.Models;
+﻿using NewsApp.DTOs;
+using NewsApp.Models;
 using System.Threading.Tasks;
 using static NewsApp.Models.Enum;
 
@@ -14,6 +15,10 @@ namespace NewsApp.Repositories.Interfaces
         Task<IEnumerable<Article>> GetArticlesForRanking(int categoryID);
 
         Task<IEnumerable<Article>> GetAllApprcvedEditedArticlesAsync();
+
+        Task<int> GetAllArticleCountByStatus(ArticleStatus articleStatus);
+
+        Task<ArticleDto> MostInteractedArticle(string type);
 
     }
 }

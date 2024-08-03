@@ -1,10 +1,9 @@
-﻿using Google;
-using NewsApp.DTOs;
+﻿using NewsApp.DTOs;
 using NewsApp.Exceptions;
 using NewsApp.Mappers;
-using NewsApp.Models;
 using NewsApp.Repositories.Interfaces;
 using NewsApp.Services.Interfaces;
+using static NewsApp.Models.Enum;
 
 namespace NewsApp.Services.Classes
 {
@@ -12,10 +11,44 @@ namespace NewsApp.Services.Classes
     {
         private readonly IArticleRepository _articleRepository;
         private readonly ISavedArticleService _savedArticleService;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserPreferenceRepository _userPreferenceRepository;
 
-        public RankArticleService(IArticleRepository articleRepository, ISavedArticleService savedArticleService) { 
+        public RankArticleService(IArticleRepository articleRepository, ISavedArticleService savedArticleService, IUserRepository userRepository, IUserPreferenceRepository userPreferenceRepository) { 
             _articleRepository = articleRepository;
             _savedArticleService = savedArticleService;
+            _userRepository = userRepository;
+            _userPreferenceRepository = userPreferenceRepository;
+        }
+
+        public async Task<StatisticsDto> GetAllStatistics()
+        {
+            var totalUserCount = await _userRepository.GetAllUserCountAsync();
+
+            var totalApprovedArticleCount = await _articleRepository.GetAllArticleCountByStatus(ArticleStatus.Approved);
+            var totalEditedArticleCount = await _articleRepository.GetAllArticleCountByStatus(ArticleStatus.Edited);
+            var totalRejectedArticleCount = await _articleRepository.GetAllArticleCountByStatus(ArticleStatus.Rejected);
+            var totalPendingArticleCount = await _articleRepository.GetAllArticleCountByStatus(ArticleStatus.Pending);
+
+            var mostCommentedArticle = await _articleRepository.MostInteractedArticle("comment");
+            var mostSavedArticle = await _articleRepository.MostInteractedArticle("saved");
+            var mostSharedArticle = await _articleRepository.MostInteractedArticle("shared");
+
+            var categoryPreferences = await _userPreferenceRepository.LikedDiskedAriclesORder();
+
+            return new StatisticsDto
+            {
+
+                TotalUserCount = totalUserCount,
+                TotalApprovedArticleCount = totalApprovedArticleCount,
+                TotalEditedArticleCount = totalEditedArticleCount,
+                TotalRejectedArticleCount = totalRejectedArticleCount,
+                TotalPendingArticleCount = totalPendingArticleCount,
+                MostCommentedArticle = mostCommentedArticle,
+                MostSavedArticle = mostSavedArticle,
+                MostSharedArticle = mostSharedArticle,
+                CategoryPreferences = categoryPreferences
+            };
         }
 
         //Removed 7 days constraint for now
@@ -23,7 +56,7 @@ namespace NewsApp.Services.Classes
         {
             var articles = await _articleRepository.GetArticlesForRanking(category);
 
-            if(articles == null || articles.Count() == 0) {
+            if(!articles.Any()) {
                 throw new NoAvailableItemException();
             }
 

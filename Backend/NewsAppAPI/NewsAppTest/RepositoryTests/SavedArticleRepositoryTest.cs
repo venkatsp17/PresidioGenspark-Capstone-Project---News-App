@@ -2,13 +2,8 @@
 using NewsApp.Contexts;
 using NewsApp.Exceptions;
 using NewsApp.Models;
-using NewsApp.Repositories;
 using NewsApp.Repositories.Classes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace NewsAppTest.RepositoryTests
 {
@@ -202,6 +197,30 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.SavedArticleID, Is.EqualTo(savedArticle1.SavedArticleID));
         }
 
-    
+        [Test]
+        public async Task GetSavedArticleBy2Id_ShouldReturnSavedArticle()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var repository = new SavedArticleRepository(context);
+            var savedArticle1 = new SavedArticle
+            {
+                SavedArticleID = 1,
+                ArticleID = 1,
+                UserID = 1,
+                SavedAt = DateTime.UtcNow
+            };
+            context.SavedArticles.Add(savedArticle1);
+            await context.SaveChangesAsync();
+
+            // Act
+            var result = await repository.GetBy2Id("UserID","1", "ArticleID", "1");
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.That(result.SavedArticleID, Is.EqualTo(savedArticle1.SavedArticleID));
+        }
+
+
     }
 }

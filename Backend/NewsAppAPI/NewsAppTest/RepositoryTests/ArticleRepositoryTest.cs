@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsApp.Contexts;
+using NewsApp.DTOs;
 using NewsApp.Exceptions;
 using NewsApp.Models;
 using NewsApp.Repositories.Classes;
@@ -435,5 +436,180 @@ namespace NewsAppTest.RepositoryTests
             Assert.That(result.ArticleID, Is.EqualTo(article1.ArticleID));
         }
 
+        [Test]
+        public async Task Get_AllApprovedEditedArticles_Success()
+        {
+            var _context = GetInMemoryDbContext();
+            var _articleRepository = new ArticleRepository(_context);
+            var article1 = new Article
+            {
+                ArticleID = 1,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+            };
+
+            await _articleRepository.Add(article1);
+            var result = await _articleRepository.GetAllApprcvedEditedArticlesAsync();
+
+            Assert.NotNull(result);
+            Assert.AreEqual(1, result.Count());
+        }
+
+        [Test]
+        public async Task Get_AllArticleCountByStatus_Success()
+        {
+            var _context = GetInMemoryDbContext();
+            var _articleRepository = new ArticleRepository(_context);
+            var article1 = new Article
+            {
+                ArticleID = 1,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+            };
+
+            await _articleRepository.Add(article1);
+            var result = await _articleRepository.GetAllArticleCountByStatus(ArticleStatus.Approved);
+
+            Assert.NotNull(result);
+            Assert.AreEqual(1, result);
+        }
+
+
+        [Test]
+        public async Task Get_AllArticlesForRanking_Success()
+        {
+            var _context = GetInMemoryDbContext();
+            var _articleRepository = new ArticleRepository(_context);
+            var article1 = new Article
+            {
+                ArticleID = 1,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                ArticleCategories = new[]
+                {
+                   new ArticleCategory(){
+                       ArticleID = 1,
+                       CategoryID = 1
+                    }
+                }
+            };
+
+            await _articleRepository.Add(article1);
+            var result = await _articleRepository.GetArticlesForRanking(1);
+
+            Assert.AreEqual(article1.Status, result.First().Status);
+        }
+
+        [Test]
+        public async Task Get_MostInteractedArticle_Success()
+        {
+            var _context = GetInMemoryDbContext();
+            var _articleRepository = new ArticleRepository(_context);
+            var article1 = new Article
+            {
+                ArticleID = 1,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                CommentCount = 500,
+                ShareCount = 100,
+            };
+            var article2 = new Article
+            {
+                ArticleID = 2,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 200,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                CommentCount = 100,
+                ShareCount = 100,
+            };
+            var article3 = new Article
+            {
+                ArticleID = 3,
+                Title = "Breaking News: Tech Innovation",
+                Content = "Detailed content about the latest in tech innovation...",
+                Summary = "A brief summary of the tech innovation article.",
+                AddedAt = DateTime.UtcNow,
+                OriginURL = "https://example.com/tech-innovation",
+                ImgURL = "https://example.com/images/tech.jpg",
+                CreatedAt = DateTime.UtcNow,
+                ImpScore = 9.5m,
+                SaveCount = 100,
+                HashID = "",
+                OldHashID = "",
+                Status = ArticleStatus.Approved,
+                CommentCount = 100,
+                ShareCount = 300,
+            };
+
+            await _articleRepository.Add(article1);
+            await _articleRepository.Add(article2);
+            await _articleRepository.Add(article3);
+
+            var result = await _articleRepository.MostInteractedArticle("comment");
+
+            Assert.AreEqual(article1.ArticleID, result.Id);
+
+            result = await _articleRepository.MostInteractedArticle("saved");
+
+            Assert.AreEqual(article2.ArticleID, result.Id);
+
+            result = await _articleRepository.MostInteractedArticle("shared");
+
+            Assert.AreEqual(article3.ArticleID, result.Id);
+
+            result = await _articleRepository.MostInteractedArticle("");
+
+            Assert.NotNull( result);
+
+        }
     }
 }

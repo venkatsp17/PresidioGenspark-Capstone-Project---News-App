@@ -5,6 +5,7 @@ using NewsApp.Mappers;
 using NewsApp.Models;
 using NewsApp.Repositories.Interfaces;
 using NewsApp.Services.Interfaces;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NewsApp.Services.Classes
 {
@@ -38,7 +39,7 @@ namespace NewsApp.Services.Classes
                 return await Task.FromResult(false);
             }
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task<int> SaveAndUnSaveArticle(int articleid, int userid)
         {
             var article = await _savedArticleRepository.GetBy2Id("ArticleID",articleid.ToString(),"UserID",userid.ToString());

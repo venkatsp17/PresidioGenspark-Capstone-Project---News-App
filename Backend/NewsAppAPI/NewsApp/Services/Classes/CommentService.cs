@@ -1,6 +1,4 @@
-﻿using Confluent.Kafka;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.SignalR;
 using NewsApp.DTOs;
 using NewsApp.Exceptions;
 using NewsApp.Mappers;
@@ -14,10 +12,10 @@ namespace NewsApp.Services.Classes
     {
         private readonly IHubContext<CommentHub> _hubContext;
         private readonly IRepository<string, Comment, string> _commentRepository;
-        private readonly IRepository<string, User, string> _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IArticleRepository _articleRepository;
 
-        public CommentService(IHubContext<CommentHub> hubContext, IRepository<string, Comment, string> commentRepository, IRepository<string, User, string> userRepository, IArticleRepository articleRepository)
+        public CommentService(IHubContext<CommentHub> hubContext, IRepository<string, Comment, string> commentRepository, IUserRepository userRepository, IArticleRepository articleRepository)
         {
             _hubContext = hubContext;
             _commentRepository =commentRepository;

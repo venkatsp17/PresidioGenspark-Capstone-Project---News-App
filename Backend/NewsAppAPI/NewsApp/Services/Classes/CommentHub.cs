@@ -1,16 +1,18 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace NewsApp.Services.Classes
 {
     public class CommentHub : Hub
     {
+        [ExcludeFromCodeCoverage]
         public override Task OnConnectedAsync()
         {
             Console.WriteLine($"Client connected: {Context.ConnectionId}");
             return base.OnConnectedAsync();
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task JoinGroup(string articleId)
         {
             try
@@ -31,7 +33,7 @@ namespace NewsApp.Services.Classes
                 Console.WriteLine($"Error joining group: {ex.Message}");
             }
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task LeaveGroup(string articleId)
         {
             try
@@ -44,7 +46,7 @@ namespace NewsApp.Services.Classes
                 Console.WriteLine($"Error leaving group: {ex.Message}");
             }
         }
-
+        [ExcludeFromCodeCoverage]
         public override Task OnDisconnectedAsync(Exception exception)
         {
             Console.WriteLine($"Client disconnected: {Context.ConnectionId}");

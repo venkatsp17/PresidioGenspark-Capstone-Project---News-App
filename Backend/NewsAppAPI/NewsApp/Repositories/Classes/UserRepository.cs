@@ -8,7 +8,7 @@ using static NewsApp.Models.Enum;
 
 namespace NewsApp.Repositories.Classes
 {
-    public class UserRepository : IRepository<string, User, string>
+    public class UserRepository : IUserRepository
     {
         protected readonly NewsAppDBContext _context;
         private readonly DbSet<User> _dbSet;
@@ -78,6 +78,11 @@ namespace NewsApp.Repositories.Classes
 
             return result;
 
+        }
+
+        public Task<int> GetAllUserCountAsync()
+        {
+            return _dbSet.CountAsync(); 
         }
 
         public async Task<User> Update(User item, string key)

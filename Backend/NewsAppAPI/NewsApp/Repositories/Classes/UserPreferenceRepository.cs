@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsApp.Contexts;
+using NewsApp.DTOs;
 using NewsApp.Exceptions;
+using NewsApp.Migrations;
 using NewsApp.Models;
 using NewsApp.Repositories.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using static NewsApp.Models.Enum;
 
 namespace NewsApp.Repositories.Classes
 {
@@ -82,8 +85,9 @@ namespace NewsApp.Repositories.Classes
             {
                 _dbSet.RemoveRange(entities);
                 await _context.SaveChangesAsync();
+                return entities;
             }
-            return entities;
+            return null;
         }
 
 
@@ -121,6 +125,22 @@ namespace NewsApp.Repositories.Classes
         public async Task<UserPreference> Update(UserPreference item, string key)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<CategoryPreferenceDto>> LikedDiskedAriclesORder()
+        {
+            var categoryPreferences = await _dbSet
+               .GroupBy(up => up.Category.Name)
+               .Select(g => new CategoryPreferenceDto
+               {
+                   CategoryName = g.Key,
+                   Likes = g.Count(up => up.preference == Preference.Like),
+                   Dislikes = g.Count(up => up.preference == Preference.DisLike)
+               })
+               .OrderByDescending(cp => cp.Likes)
+               .ToListAsync(); 
+
+            return categoryPreferences;
         }
     }
 }

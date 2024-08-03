@@ -77,8 +77,12 @@ namespace NewsApp.Repositories.Classes
             var property = Expression.Property(parameter, key);
 
             Expression<Func<ShareData, bool>> lambda;
-
-            var constantValue = Expression.Constant(int.Parse(value));
+            var constantValue = Expression.Constant(value);
+            if (key.ToLower().Contains("id"))
+            {
+                constantValue = Expression.Constant(int.Parse(value));
+            }
+           
             var equalExpression = Expression.Equal(property, constantValue);
             lambda = Expression.Lambda<Func<ShareData, bool>>(equalExpression, parameter);
 

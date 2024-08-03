@@ -7,153 +7,147 @@ using NewsApp.DTOs;
 using NewsApp.Exceptions;
 using NewsApp.Models;
 using NewsApp.Repositories.Classes;
+using NewsApp.Repositories.Interfaces;
 using NewsApp.Services.Classes;
 using NewsApp.Services.Interfaces;
-
+using System.Security.Cryptography;
+using System.Text;
 using static NewsApp.Models.Enum;
 
 namespace NewsAppTest.NewFolder
 {
     public class AuthenticationServiceTest
     {
-        private readonly Mock<IGoogleOAuthService> _mockGoogleOAuthService;
-        private readonly AuthenticationService _authenticationService;
-
-        public AuthenticationServiceTest()
-        {
-            _mockGoogleOAuthService = new Mock<IGoogleOAuthService>();
-        }
-
-        private NewsAppDBContext GetInMemoryDbContext()
-        {
-           
-            var options = new DbContextOptionsBuilder<NewsAppDBContext>()
-                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-                 .Options;
-
-            var context = new NewsAppDBContext(options);
-            context.Database.EnsureCreated();
-            return context;
-        }
-
+       
         [Test]
-        public async Task LoginUser_UserExists_UpdatesToken_ReturnsUser()
+        public async Task UserLogin_Successful_ReturnsLoginReturnDTO()
         {
             // Arrange
-            var loginGetDTO = new LoginGetDTO { oAuthToken = "newToken" };
-            var payload = new GoogleJsonWebSignature.Payload
+            var loginDTO = new LoginGetDTO1 { Email = "test@example.com", Password = "password123" };
+            var user = new User
             {
-                Subject = "testSubject",
+                UserID = 1,
                 Email = "test@example.com",
-                Name = "Test User"
+                Name = "Test User",
+                Role = UserType.Reader,
+                Password_Hashkey = new byte[64], // HMACSHA512 key length
+                Password = new HMACSHA512(new byte[64]).ComputeHash(System.Text.Encoding.UTF8.GetBytes("password123"))
             };
-            _mockGoogleOAuthService.Setup(x => x.ValidateGoogleTokenAsync(It.IsAny<string>()))
-                                   .ReturnsAsync(payload);
 
-            var context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(context);
-            _userRepository.Add(new User { UserID = 1, OAuthID = "testSubject", OAuthToken = "oldToken", Email = "test@example.com", Name = "Test User", Role = UserType.Reader });
-            Mock<IConfigurationSection> configurationJWTSection = new Mock<IConfigurationSection>();
-            configurationJWTSection.Setup(x => x.Value).Returns("This is the dummy key which has to be a bit long for the 512. which should be even more longer for the passing");
-            Mock<IConfigurationSection> congigTokenSection = new Mock<IConfigurationSection>();
-            congigTokenSection.Setup(x => x.GetSection("JWT")).Returns(configurationJWTSection.Object);
-            Mock<IConfiguration> mockConfig = new Mock<IConfiguration>();
-            mockConfig.Setup(x => x.GetSection("TokenKey")).Returns(congigTokenSection.Object);
-            ITokenService service = new TokenService(mockConfig.Object);
-            var authenticationService = new AuthenticationService(_userRepository, _mockGoogleOAuthService.Object, service);
-            var result = await authenticationService.LoginUser(loginGetDTO);
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository.Setup(repo => repo.Get("Email", loginDTO.Email)).ReturnsAsync(user);
 
+            var mockTokenService = new Mock<ITokenService>();
+            mockTokenService.Setup(service => service.GenerateToken(It.IsAny<User>())).Returns("dummyToken");
+
+            var authenticationService = new AuthenticationService(mockUserRepository.Object, null, mockTokenService.Object);
+
+            // Act
+            var result = await authenticationService.UserLogin(loginDTO);
 
             // Assert
             Assert.NotNull(result);
             Assert.AreEqual("test@example.com", result.Email);
-            //Assert.AreEqual("newToken", result.Token);
+            Assert.AreEqual("dummyToken", result.Token);
         }
 
         [Test]
-        public async Task LoginUser_UserDoesNotExist_AddsUser_ReturnsUser()
+        public void UserLogin_UserNotFound_ThrowsUnableToLoginException()
         {
             // Arrange
-            var loginGetDTO = new LoginGetDTO { oAuthToken = "newToken" };
-            var payload = new GoogleJsonWebSignature.Payload
+            var loginDTO = new LoginGetDTO1 { Email = "test@example.com", Password = "password123" };
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository.Setup(repo => repo.Get("Email", loginDTO.Email)).ReturnsAsync((User)null);
+
+            var authenticationService = new AuthenticationService(mockUserRepository.Object, null, null);
+
+            // Act & Assert
+            Assert.ThrowsAsync<UnableToLoginException>(async () => await authenticationService.UserLogin(loginDTO));
+        }
+
+        [Test]
+        public void UserLogin_IncorrectPassword_ThrowsUnauthorizedUserException()
+        {
+            // Arrange
+            var loginDTO = new LoginGetDTO1 { Email = "test@example.com", Password = "wrongPassword" };
+            var user = new User
             {
-                Subject = "newSubject",
-                Email = "new@example.com",
-                Name = "New User"
+                UserID = 1,
+                Email = "test@example.com",
+                Name = "Test User",
+                Role = UserType.Reader,
+                Password_Hashkey = new byte[64], // HMACSHA512 key length
+                Password = new HMACSHA512(new byte[64]).ComputeHash(Encoding.UTF8.GetBytes("password123"))
             };
-            _mockGoogleOAuthService.Setup(x => x.ValidateGoogleTokenAsync(It.IsAny<string>()))
-                                   .ReturnsAsync(payload);
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository.Setup(repo => repo.Get("Email", loginDTO.Email)).ReturnsAsync(user);
+
+            var authenticationService = new AuthenticationService(mockUserRepository.Object, null, null);
+
+            // Act & Assert
+            Assert.ThrowsAsync<UnauthorizedUserException>(async () => await authenticationService.UserLogin(loginDTO));
+        }
+
+        [Test]
+        public async Task UserRegister_Successful_ReturnsRegisterReturnDTO()
+        {
+            // Arrange
+            var registerDTO = new RegisterGetDTO { Email = "new@example.com", Password = "password123", Name = "New User" };
+
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository.Setup(repo => repo.Get("Email", registerDTO.Email)).ReturnsAsync((User)null);
+            mockUserRepository.Setup(repo => repo.Add(It.IsAny<User>())).ReturnsAsync(new User
+            {
+                UserID = 1,
+                Email = "new@example.com",
+                Name = "New User",
+                Role = UserType.Reader
+            });
+
+            var authenticationService = new AuthenticationService(mockUserRepository.Object, null, null);
 
             // Act
-            LoginReturnDTO result;
-
-            var context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(context);
-            Mock<IConfigurationSection> configurationJWTSection = new Mock<IConfigurationSection>();
-            configurationJWTSection.Setup(x => x.Value).Returns("This is the dummy key which has to be a bit long for the 512. which should be even more longer for the passing");
-            Mock<IConfigurationSection> congigTokenSection = new Mock<IConfigurationSection>();
-            congigTokenSection.Setup(x => x.GetSection("JWT")).Returns(configurationJWTSection.Object);
-            Mock<IConfiguration> mockConfig = new Mock<IConfiguration>();
-            mockConfig.Setup(x => x.GetSection("TokenKey")).Returns(congigTokenSection.Object);
-            ITokenService service = new TokenService(mockConfig.Object);
-            var authenticationService = new AuthenticationService(_userRepository, _mockGoogleOAuthService.Object, service);
-            result = await authenticationService.LoginUser(loginGetDTO);
-
+            var result = await authenticationService.UserRegister(registerDTO);
 
             // Assert
             Assert.NotNull(result);
             Assert.AreEqual("new@example.com", result.Email);
-            //Assert.AreEqual("newToken", result.OAuthToken);
-
-
-            var user = await _userRepository.Get("OAuthID", "newSubject");
-            Assert.NotNull(user);
-            Assert.AreEqual("new@example.com", user.Email);
-
+            Assert.AreEqual("New User", result.Name);
         }
 
         [Test]
-        public async Task LogoutUser_UserExists_UpdatesTokenToNull()
+        public void UserRegister_UserAlreadyExists_ThrowsUserAlreadyExistsException()
         {
             // Arrange
-            var context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(context);
-            _userRepository.Add(new User { UserID = 1, OAuthID = "testSubject", OAuthToken = "oldToken", Email = "test@example.com", Name = "Test User", Role = UserType.Reader });
+            var registerDTO = new RegisterGetDTO { Email = "existing@example.com", Password = "password123", Name = "Existing User" };
+            var existingUser = new User { Email = "existing@example.com" };
 
-            // Act
-            Mock<IConfigurationSection> configurationJWTSection = new Mock<IConfigurationSection>();
-            configurationJWTSection.Setup(x => x.Value).Returns("This is the dummy key which has to be a bit long for the 512. which should be even more longer for the passing");
-            Mock<IConfigurationSection> congigTokenSection = new Mock<IConfigurationSection>();
-            congigTokenSection.Setup(x => x.GetSection("JWT")).Returns(configurationJWTSection.Object);
-            Mock<IConfiguration> mockConfig = new Mock<IConfiguration>();
-            mockConfig.Setup(x => x.GetSection("TokenKey")).Returns(congigTokenSection.Object);
-            ITokenService service = new TokenService(mockConfig.Object);
-            var authenticationService = new AuthenticationService(_userRepository, _mockGoogleOAuthService.Object, service);
-            await authenticationService.LogoutUser("1");
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository.Setup(repo => repo.Get("Email", registerDTO.Email)).ReturnsAsync(existingUser);
 
-            // Assert
-            var user = await _userRepository.Get("UserID","1");
-            Assert.NotNull(user);
-            Assert.Null(user.OAuthToken);
+            var authenticationService = new AuthenticationService(mockUserRepository.Object, null, null);
 
+            // Act & Assert
+            Assert.ThrowsAsync<UserAlreadyExistsException>(async () => await authenticationService.UserRegister(registerDTO));
         }
 
         [Test]
-        public async Task LogoutUser_UserDoesNotExist_ThrowsItemNotFoundException()
+        public void UserRegister_UnableToRegister_ThrowsUnableToRegisterException()
         {
-            // Act & Assert
-            var context = GetInMemoryDbContext();
-            var _userRepository = new UserRepository(context);
-            Mock<IConfigurationSection> configurationJWTSection = new Mock<IConfigurationSection>();
-            configurationJWTSection.Setup(x => x.Value).Returns("This is the dummy key which has to be a bit long for the 512. which should be even more longer for the passing");
-            Mock<IConfigurationSection> congigTokenSection = new Mock<IConfigurationSection>();
-            congigTokenSection.Setup(x => x.GetSection("JWT")).Returns(configurationJWTSection.Object);
-            Mock<IConfiguration> mockConfig = new Mock<IConfiguration>();
-            mockConfig.Setup(x => x.GetSection("TokenKey")).Returns(congigTokenSection.Object);
-            ITokenService service = new TokenService(mockConfig.Object);
-            var authenticationService = new AuthenticationService(_userRepository, _mockGoogleOAuthService.Object, service);
-            Assert.ThrowsAsync<ItemNotFoundException>(async () => await authenticationService.LogoutUser("999"));
+            // Arrange
+            var registerDTO = new RegisterGetDTO { Email = "new@example.com", Password = "password123", Name = "New User" };
 
+            var mockUserRepository = new Mock<IUserRepository>();
+            mockUserRepository.Setup(repo => repo.Get("Email", registerDTO.Email)).ReturnsAsync((User)null);
+            mockUserRepository.Setup(repo => repo.Add(It.IsAny<User>())).ReturnsAsync(new User());
+
+            var authenticationService = new AuthenticationService(mockUserRepository.Object, null, null);
+
+            // Act & Assert
+            Assert.ThrowsAsync<UnableToRegisterException>(async () => await authenticationService.UserRegister(registerDTO));
         }
+
     }
 }

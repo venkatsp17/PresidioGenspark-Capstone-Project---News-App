@@ -19,7 +19,7 @@ namespace NewsApp.Services.Classes
         {
             var categories = await _categoryRepository.GetAll("", "");
 
-            if(categories == null || categories.Count() == 0)
+            if(!categories.Any())
             {
                 throw new NoAvailableItemException();
             }
@@ -43,7 +43,7 @@ namespace NewsApp.Services.Classes
             };
             var category = await _categoryRepository.Add(newCategory);
 
-            if (category.CategoryID == null)
+            if (category.CategoryID == 0)
             {
                 throw new UnableToAddItemException();
             }
@@ -60,7 +60,7 @@ namespace NewsApp.Services.Classes
         {
             var category = await _categoryRepository.Delete(categoryid.ToString());
 
-            if (category.CategoryID == null)
+            if (category == null)
             {
                 throw new ItemNotFoundException();
             }

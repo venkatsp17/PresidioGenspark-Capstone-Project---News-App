@@ -3,6 +3,7 @@ using NewsApp.Contexts;
 using NewsApp.Exceptions;
 using NewsApp.Models;
 using NewsApp.Repositories.Classes;
+using NewsApp.Repositories.Interfaces;
 
 
 namespace NewsAppTest.RepositoryTests
@@ -214,6 +215,65 @@ namespace NewsAppTest.RepositoryTests
             // Assert
             Assert.NotNull(result);
             Assert.That(result.CategoryID, Is.EqualTo(articleCategory1.CategoryID));
+        }
+
+
+        [Test]
+        public async Task GetArticleCategoryByCompositeKey_ShouldReturnArticleCategory()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var repository = new ArticleCategoryRepository(context);
+            var articleCategory1 = new ArticleCategory
+            {
+                CategoryID = 1,
+                ArticleID = 1,
+            };
+            context.ArticleCategories.Add(articleCategory1);
+            await context.SaveChangesAsync();
+
+            // Act
+            var result = await repository.Get("", "1-1");
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.That(result.CategoryID, Is.EqualTo(articleCategory1.CategoryID));
+        }
+
+        [Test]
+        public async Task GetArticleCategoryByCompositeKey_ArgumentException()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var repository = new ArticleCategoryRepository(context);
+            var articleCategory1 = new ArticleCategory
+            {
+                CategoryID = 1,
+                ArticleID = 1,
+            };
+            context.ArticleCategories.Add(articleCategory1);
+            await context.SaveChangesAsync();
+
+            // Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => await repository.Get("", "1-1-2"));
+        }
+
+        [Test]
+        public async Task GetArticleCategoryByCompositeKey_DataNotPresent()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var repository = new ArticleCategoryRepository(context);
+            var articleCategory1 = new ArticleCategory
+            {
+                CategoryID = 1,
+                ArticleID = 1,
+            };
+            context.ArticleCategories.Add(articleCategory1);
+            await context.SaveChangesAsync();
+
+            // Assert
+            Assert.IsNull(await repository.Get("", "1-2"));
         }
 
     }

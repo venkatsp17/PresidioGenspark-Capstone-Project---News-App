@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NewsApp.DTOs;
 using NewsApp.Models;
 
 namespace NewsApp.Repositories.Interfaces
@@ -9,5 +10,7 @@ namespace NewsApp.Repositories.Interfaces
 
 
         Task<IEnumerable<UserPreference>> DeleteByCategoryID(string key);
+
+        Task<IEnumerable<CategoryPreferenceDto>> LikedDiskedAriclesORder();
     }
 }

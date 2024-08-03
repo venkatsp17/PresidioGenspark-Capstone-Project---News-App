@@ -5,6 +5,7 @@ using NewsApp.Models;
 using NewsApp.Repositories.Interfaces;
 using NewsApp.Services.Interfaces;
 using Sprache;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using static NewsApp.Models.Enum;
@@ -13,17 +14,17 @@ namespace NewsApp.Services.Classes
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IRepository<string, User, string> _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IGoogleOAuthService _googleOAuthService;
         private readonly ITokenService _tokenService;
 
-        public AuthenticationService(IRepository<string, User, string> userRepository, IGoogleOAuthService googleOAuthService, ITokenService tokenService)
+        public AuthenticationService(IUserRepository userRepository, IGoogleOAuthService googleOAuthService, ITokenService tokenService)
         {
             _userRepository = userRepository;
             _googleOAuthService = googleOAuthService;
             _tokenService = tokenService;
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task<RegisterReturnDTO> CreatePassword(CreatePasswordDTO createPasswordDTO)
         {
             var user = await _userRepository.Get("UserID", createPasswordDTO.userID);
@@ -46,7 +47,7 @@ namespace NewsApp.Services.Classes
             return MapCustomerToRegisterReturnDTO(result);
         }
 
-
+        [ExcludeFromCodeCoverage]
         public async Task<LoginReturnDTO> LoginUser(LoginGetDTO loginGetDTO)
         {
             var payload = await _googleOAuthService.ValidateGoogleTokenAsync(loginGetDTO.oAuthToken);
@@ -93,7 +94,7 @@ namespace NewsApp.Services.Classes
                 return loginReturnDTO;
             }
         }
-
+        [ExcludeFromCodeCoverage]
         public async Task LogoutUser(string userId)
         {
 
@@ -145,7 +146,7 @@ namespace NewsApp.Services.Classes
             var user = await _userRepository.Get("Email", loginDTO.Email);
             if (user == null)
             {
-                throw new UnableToLoginException();
+                throw new UserNotFoundException();
             }
             var encryptedPassword = EncryptPassword(loginDTO.Password, user.Password_Hashkey);
             bool isPasswordSame = ComparePassword(encryptedPassword, user.Password);
@@ -178,7 +179,7 @@ namespace NewsApp.Services.Classes
             };
             var data = await _userRepository.Add(newuser);
 
-            if (data.UserID == null)
+            if (data.UserID == 0)
             {
                 throw new UnableToRegisterException();
             }

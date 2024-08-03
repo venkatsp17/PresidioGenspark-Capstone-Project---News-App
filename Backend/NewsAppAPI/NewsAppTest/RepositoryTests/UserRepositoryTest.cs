@@ -94,7 +94,20 @@ namespace NewsAppTest.RepositoryTests
             Assert.AreEqual(1, result.Count());
         }
 
-      
+        [Test]
+        public async Task Get_AllUsersCount_Success()
+        {
+            var _context = GetInMemoryDbContext();
+            var _userRepository = new UserRepository(_context);
+            var newUser = new User { Email = "sales@gmail.com", Name = "news", OAuthID = "35fdsf6dts76fd6fsd", OAuthToken = "35fdsf6dts76fd6fsd", Role = UserType.Reader, UserID = 3, Password = Encoding.UTF8.GetBytes("password"), Password_Hashkey = Encoding.UTF8.GetBytes("passwordHash") };
+
+            await _userRepository.Add(newUser);
+            var result = await _userRepository.GetAllUserCountAsync();
+
+            Assert.NotNull(result);
+            Assert.AreEqual(1, result);
+        }
+
 
         [Test]
         public async Task Get_AllByRole_Success()
