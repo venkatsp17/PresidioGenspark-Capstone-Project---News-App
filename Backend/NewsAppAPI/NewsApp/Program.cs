@@ -139,8 +139,8 @@ namespace NewsApp
                 config.AddConsole();
                 config.AddDebug();
             });
-            //builder.Services.AddHostedService<FetchArticlesService>();
-            //builder.Services.AddHostedService<FetchArticleCategoryService>();
+            builder.Services.AddHostedService<FetchArticlesService>();
+            builder.Services.AddHostedService<FetchArticleCategoryService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<ISavedArticleService, SavedArticleService>();

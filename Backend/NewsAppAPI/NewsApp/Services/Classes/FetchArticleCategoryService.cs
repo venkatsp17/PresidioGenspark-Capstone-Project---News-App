@@ -19,7 +19,7 @@ namespace NewsApp.Services.Classes
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("FetchArticlesTwoHourlyService is starting.");
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromHours(2));
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromHours(23));
             return Task.CompletedTask;
         }
         [ExcludeFromCodeCoverage]
