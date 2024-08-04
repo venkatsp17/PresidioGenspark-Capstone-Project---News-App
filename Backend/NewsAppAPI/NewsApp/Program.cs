@@ -42,7 +42,7 @@ namespace NewsApp
                 options.AddPolicy("AllowSpecificOrigin",
                     builder =>
                     {
-                        builder.WithOrigins("http://127.0.0.1:3000", "http://localhost:3000", "http://localhost", "http://127.0.0.1")
+                        builder.WithOrigins("http://127.0.0.1:3000", "http://localhost:3000", "http://localhost", "http://127.0.0.1", "https://lively-mud-0c7af2f1e.5.azurestaticapps.net")
                                .AllowAnyHeader()
                                .AllowAnyMethod()
                                .AllowCredentials(); // This line is crucial for allowing credentials
