@@ -72,6 +72,7 @@ namespace NewsApp.Services.Classes
         public async Task FetchAndSaveArticlesAsync()
         {
             var minNewsId = _cache.Get<string>(MinNewsIdCacheKey);
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             string url = minNewsId == null
                 ? "https://m.inshorts.com/api/in/en/news?category=top_stories&max_limit=10&include_card_data=true"
                 : $"https://m.inshorts.com/api/in/en/news?category=top_stories&max_limit=10&include_card_data=true&news_offset={minNewsId}";
@@ -94,7 +95,7 @@ namespace NewsApp.Services.Classes
 
             try
             {
-                var response = await _httpClient.GetStringAsync(url);
+                var response = await _httpClient.GetStringAsync(url, cts.Token);
 
 
                 var json = JObject.Parse(response);
@@ -257,6 +258,7 @@ namespace NewsApp.Services.Classes
         private async Task FetchAndSaveArticlesByCategoryAsync(Category category, int pageNumber)
         {
             string url = $"https://m.inshorts.com/api/en/search/trending_topics/{category.Description}?page={pageNumber}&type={category.Type}";
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9,en-GB;q=0.8");
@@ -275,7 +277,7 @@ namespace NewsApp.Services.Classes
             _httpClient.DefaultRequestHeaders.Clear();                                         
             try
             {
-                var response = await _httpClient.GetStringAsync(url);
+                var response = await _httpClient.GetStringAsync(url, cts.Token);
 
                 var json = JObject.Parse(response);
                 Console.WriteLine(json);
