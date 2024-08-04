@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a049a789-5ab6-4ae6-b28f-f20e9aa924f4</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <StartupObject>NewsApp.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

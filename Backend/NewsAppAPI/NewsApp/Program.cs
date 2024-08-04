@@ -84,6 +84,7 @@ namespace NewsApp
                 });
             });
             log.Info("Adding JWT Authentication");
+            log.Error(builder.Configuration["JWT"]);
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
