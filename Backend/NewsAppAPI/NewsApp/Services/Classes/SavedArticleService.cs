@@ -34,7 +34,7 @@ namespace NewsApp.Services.Classes
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
+                // Log the exception for debugging1
                 _logger.LogError($"Error in CheckForSaved: {ex.Message}", ex);
                 return await Task.FromResult(false);
             }
